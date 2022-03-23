@@ -31,7 +31,7 @@ levels <- list(
 doe <- makeDoe(levels)
 
 # Re-code levels
-doe <- recodeDesign(doe, levels)
+doe <- recodeDoe(doe, levels) # Note: this function has now been replaced in the new cbcTools package
 
 
 # Make the survey
