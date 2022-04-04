@@ -844,11 +844,6 @@ scenarioPlotAll <- plot_grid(
 
 scenarioPlotAll
 
-ggsave(
-  filename = here('figs', 'scenarioPlotAll_appendix.png'), 
-  plot = scenarioPlotAll, 
-  width = 10, height = 6.5
-)
 
 
 ```
