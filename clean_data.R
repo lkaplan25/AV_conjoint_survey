@@ -14,11 +14,11 @@ library(readr)
 
 
 # Download raw data-----------
-raw_data_start_path <- read_csv(here("data_raw", "AV_formr_conjoint_start_v3.csv"))
-raw_data_P1 <- read_csv(here("data_raw", "AV_formr_conjoint_P1_v3.csv"))
-raw_data_P2 <- read_csv(here("data_raw", "AV_formr_conjoint_P2_v3.csv"))
-raw_data_P3 <- read_csv(here("data_raw", "AV_formr_conjoint_P3_v3.csv"))
-raw_data_P4 <- read_csv(here("data_raw", "AV_formr_conjoint_P4_v3.csv"))
+raw_data_start_path <- read_csv(here::here("data_raw", "AV_formr_conjoint_start_v3.csv"))
+raw_data_P1 <- read_csv(here::here("data_raw", "AV_formr_conjoint_P1_v3.csv"))
+raw_data_P2 <- read_csv(here::here("data_raw", "AV_formr_conjoint_P2_v3.csv"))
+raw_data_P3 <- read_csv(here::here("data_raw", "AV_formr_conjoint_P3_v3.csv"))
+raw_data_P4 <- read_csv(here::here("data_raw", "AV_formr_conjoint_P4_v3.csv"))
 
 
 #Format start survey
@@ -132,6 +132,8 @@ data_clean <- raw_data %>%
     avg_sec_cbcLastFour = as.numeric(((sec_cbc5 + sec_cbc6 + sec_cbc7 + sec_cbc8)/4), units = "secs")
   )
 
+data_clean$id = seq(nrow(data_clean)) 
+
 write_csv(data_clean, here::here('data_processed', 'data_clean.csv')) 
 
 
@@ -212,7 +214,6 @@ data <- data %>%
 
 dim(data)
 
-
 data_filtered <- data
 
 # Demographic groupings ---------
@@ -251,22 +252,23 @@ write_csv(data_filtered, here::here('data_processed', 'data_filtered.csv'))
 
 survey <- read_csv(here::here('survey.csv'))
 data_filtered <- read_csv(here::here('data_processed', 'data_filtered.csv')) %>% 
-  select(session, respondentID, cbc1, cbc2, cbc3, cbc4, cbc5, cbc6, cbc7, cbc8, everything())
+  select(session, respondentID, id, cbc1, cbc2, cbc3, cbc4, cbc5, cbc6, cbc7, cbc8, everything())
 
 
 # Remove participants who are missing demographic info
 
-data_filtered <- data_filtered %>% 
+data_filtered <- data_filtered %>%
   filter(genderGroup != "unknown")
+         
 
 dim(data_filtered)
 
 # Merge responses with survey designs to get choiceData 
 
 choiceData <- data_filtered %>% 
-  select(respondentID, cbc1:cbc8, genderGroup, incomeGroup, raceGroup, yearOfBirth) %>% 
+  select(respondentID, cbc1:cbc8, genderGroup, incomeGroup, raceGroup, yearOfBirth, id) %>% 
   mutate(
-    weight = ifelse(genderGroup == "B", 1.15, 0.75) # added in weights for gender
+    weight = ifelse(genderGroup == "B", 1.15, 0.75) # added in weights for gender, fix weights
   ) %>% 
   gather(
     key = "qID",
@@ -275,8 +277,10 @@ choiceData <- data_filtered %>%
   ) %>% 
   mutate(
     qID = str_replace(qID, "cbc", ""),
-    qID = as.numeric(qID),
     respondentID = as.numeric(respondentID)
+  ) %>% 
+  mutate(
+    qID = as.numeric(qID)
   ) %>% 
   left_join(survey, by = c("respondentID" = "respID", "qID")) %>% 
   mutate(
@@ -284,10 +288,18 @@ choiceData <- data_filtered %>%
   ) 
 
 
-
-# Re-number obsID 
+# Re-number obsID and respondentID
 choiceData$obsID = rep(seq(nrow(choiceData) / 4), each = 4)
 
+id <-  sort(unique(choiceData$id))
+
+temp <- data.frame(id = id, newID = seq(1:length(id)))
+
+choiceData <- choiceData %>% 
+  left_join(temp, by = "id") %>% 
+  select(-id) %>% 
+  rename(id = newID) 
+  
 
 
 # Save formatted response data
