@@ -175,3 +175,60 @@ save(
   mxl_wtp_weighted,
   file = here::here("models", "mnl.RData")
 )
+
+
+# Subgroup analysis --------------------------
+
+
+## Models by gender----------------------
+
+# Split data into groups
+data_A <- data_dummy %>% filter(genderGroup == "A") #male
+data_B <- data_dummy %>% filter(genderGroup == "B") #female, transgender, non-binary
+
+# Estimate separate models for each group in WTP space
+
+mnl_wtp_A <- logitr(
+  data   = data_A,
+  outcome = "choice",
+  obsID  = "obsID",
+  # Remember one level must be "dummied out"
+  pars   = c("mode_bus", "mode_RH", "mode_sharedRH", "bus_automated_yes", "bus_attendant_yes", "RH_automated_yes", "RH_attendant_yes", "sharedRH_automated_yes", "sharedRH_attendant_yes", "travelTime"),
+  price = "price",
+  modelSpace = "wtp",
+  numMultiStarts = 10 
+)
+
+mnl_wtp_B <- logitr(
+  data   = data_B,
+  outcome = "choice",
+  obsID  = "obsID",
+  # Remember one level must be "dummied out"
+  pars   = c("mode_bus", "mode_RH", "mode_sharedRH", "bus_automated_yes", "bus_attendant_yes", "RH_automated_yes", "RH_attendant_yes", "sharedRH_automated_yes", "sharedRH_attendant_yes", "travelTime"),
+  price = "price",
+  modelSpace = "wtp",
+  numMultiStarts = 10 
+)
+
+
+# View summary of results
+summary(mnl_wtp_A) # Male
+summary(mnl_wtp_B) # Female/Trans
+
+# Check the 1st order condition: Is the gradient at the solution zero?
+mnl_wtp_A$gradient
+mnl_wtp_B$gradient
+
+# 2nd order condition: Is the hessian negative definite?
+# (If all the eigenvalues are negative, the hessian is negative definite)
+eigen(mnl_wtp_A$hessian)$values
+eigen(mnl_wtp_B$hessian)$values
+
+# Save model objects 
+
+save(
+  mnl_wtp_A,
+  mnl_wtp_B,
+  file = here("models", "mnl_wtp_gender.RData")
+)
+
