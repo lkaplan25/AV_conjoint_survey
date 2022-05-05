@@ -268,7 +268,7 @@ dim(data_filtered)
 choiceData <- data_filtered %>% 
   select(respondentID, cbc1:cbc8, genderGroup, incomeGroup, raceGroup, yearOfBirth, id) %>% 
   mutate(
-    weight = ifelse(genderGroup == "B", 1.15, 0.75) # added in weights for gender, fix weights
+    weight = ifelse(genderGroup == "B", 1.15, 0.75) # added in weights for gender
   ) %>% 
   gather(
     key = "qID",
@@ -289,7 +289,6 @@ choiceData <- data_filtered %>%
 
 
 # Re-number obsID and respondentID
-choiceData$obsID = rep(seq(nrow(choiceData) / 4), each = 4)
 
 id <-  sort(unique(choiceData$id))
 

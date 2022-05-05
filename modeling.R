@@ -48,7 +48,12 @@ data_dummy <- dummy_cols(choiceData, c('mode', 'automated', 'attendant')) %>%
     sharedRH_automated_no = mode_sharedRH*automated_No,
     sharedRH_attendant_yes = mode_sharedRH*attendant_Yes,
     sharedRH_attendant_no = mode_sharedRH*attendant_No,
-  ) 
+  ) %>% 
+  select(id, obsID, choice, weight, everything()) %>% 
+  arrange(id)
+
+data_dummy$obsID = rep(seq(nrow(data_dummy) / 4), each = 4)
+
 
 
 # Simple logit model -------
@@ -138,16 +143,16 @@ mxl_wtp_weighted <- logitr(
   data   = data_dummy,
   outcome = "choice",
   obsID  = "obsID",
-  #panelID = "id", # FIX THIS
+  panelID = "id", 
   # Remember one level must be "dummied out"
   pars   = c("mode_bus", "mode_RH", "mode_sharedRH", "bus_automated_yes", "bus_attendant_yes", "RH_automated_yes", "RH_attendant_yes", "sharedRH_automated_yes", "sharedRH_attendant_yes", "travelTime"),
   price = "price",
   modelSpace = "wtp",
   randPars = c(mode_bus = 'n', mode_RH = 'n', mode_sharedRH = 'n', bus_automated_yes = 'n', bus_attendant_yes = 'n', RH_automated_yes = 'n', RH_attendant_yes = 'n', sharedRH_automated_yes = 'n', sharedRH_attendant_yes = 'n', travelTime = 'n'),
-  numMultiStarts = 10, # Use a multi-start since log-likelihood is nonconvex
+  numMultiStarts = 1, # Use a multi-start since log-likelihood is nonconvex
   weights = "weight",
   robust = TRUE, 
-  #clusterID = "id"
+  clusterID = "id"
 )
 
 
