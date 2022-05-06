@@ -49,7 +49,7 @@ data_dummy <- dummy_cols(choiceData, c('mode', 'automated', 'attendant')) %>%
     sharedRH_attendant_yes = mode_sharedRH*attendant_Yes,
     sharedRH_attendant_no = mode_sharedRH*attendant_No,
   ) %>% 
-  select(id, obsID, choice, weight, everything()) %>% 
+  select(id, obsID, choice, weights, everything()) %>% 
   arrange(id)
 
 data_dummy$obsID = rep(seq(nrow(data_dummy) / 4), each = 4)
@@ -90,9 +90,9 @@ mnl_dummy_WTP_weighted <- logitr(
   price = "price",
   modelSpace = "wtp",
   numMultiStarts = 10, # Use a multi-start since log-likelihood is nonconvex
-  weights = "weight",
-  # robust = TRUE,
-  # clusterID = "id"
+  weights = "weights",
+  robust = TRUE,
+  clusterID = "id"
 )
 
 # View summary of results
@@ -149,8 +149,8 @@ mxl_wtp_weighted <- logitr(
   price = "price",
   modelSpace = "wtp",
   randPars = c(mode_bus = 'n', mode_RH = 'n', mode_sharedRH = 'n', bus_automated_yes = 'n', bus_attendant_yes = 'n', RH_automated_yes = 'n', RH_attendant_yes = 'n', sharedRH_automated_yes = 'n', sharedRH_attendant_yes = 'n', travelTime = 'n'),
-  numMultiStarts = 1, # Use a multi-start since log-likelihood is nonconvex
-  weights = "weight",
+  numMultiStarts = 10, # Use a multi-start since log-likelihood is nonconvex
+  weights = "weights",
   robust = TRUE, 
   clusterID = "id"
 )

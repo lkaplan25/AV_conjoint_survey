@@ -104,7 +104,7 @@ plot_mode_automated_attendant_All
 ggsave(
   filename = here('figs', 'wtp_mode.png'), 
   plot = plot_mode_automated_attendant_All, 
-  width = 9, height = 5
+  width = 7, height = 2.75
 )
 
 
@@ -205,7 +205,7 @@ plot_mode_automated_attendant <- df_mode %>%
   coord_flip() +
   facet_grid(mode~., scales = "free_y", space = "free") +
   labs(x = NULL, y = 'Willingness to Pay ($1) relative to rail',
-       subtitle = "Men willing to pay premium for automation + attendant") +
+       subtitle = "Men willing to pay more than women for automation + attendant") +
   scale_y_continuous(limits = c(xmin, xmax)) +
   theme_bw() +
   geom_hline(yintercept = 0, linetype = "dashed") +
