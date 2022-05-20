@@ -1,11 +1,13 @@
 ---
-title: "Testing Models"
-output: html_document
+title: "Testing Models - Public Repo"
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 
 load(here::here("models", "mnl.RData")) # Load models
 
@@ -18,7 +20,8 @@ load(here::here("models", "mnl.RData")) # Load models
 
 ```{r mnl_dummy}
 
-summary(mnl_dummy)
+coef(summary(mnl_dummy))
+summary(mnl_dummy)$statTable
 mnl_dummy$gradient
 eigen(mnl_dummy$hessian)$values
 
@@ -27,7 +30,9 @@ eigen(mnl_dummy$hessian)$values
 ## MNL WTP
 
 ```{r mnl_wtp, echo=FALSE}
-summary(mnl_dummy_WTP)
+
+coef(summary(mnl_dummy_WTP))
+summary(mnl_dummy_WTP)$statTable
 mnl_dummy_WTP$gradient
 eigen(mnl_dummy_WTP$hessian)$values
 
@@ -37,7 +42,8 @@ eigen(mnl_dummy_WTP$hessian)$values
 
 ```{r mnl_dummy_wtp_weighted}
 
-summary(mnl_dummy_WTP_weighted)
+coef(summary(mnl_dummy_WTP_weighted))
+summary(mnl_dummy_WTP_weighted)$statTable
 mnl_dummy_WTP_weighted$gradient
 eigen(mnl_dummy_WTP_weighted$hessian)$values
 
@@ -49,7 +55,8 @@ eigen(mnl_dummy_WTP_weighted$hessian)$values
 
 ```{r mxl_dummy}
 
-summary(mxl_dummy)
+coef(summary(mxl_dummy))
+summary(mxl_dummy)$statTable
 mxl_dummy$gradient
 eigen(mxl_dummy$hessian)$values
 
@@ -60,7 +67,8 @@ eigen(mxl_dummy$hessian)$values
 
 ```{r mxl_wtp}
 
-summary(mxl_wtp)
+coef(summary(mxl_wtp))
+summary(mxl_wtp)$statTable
 mxl_wtp$gradient
 eigen(mxl_wtp$hessian)$values
 
@@ -71,7 +79,8 @@ eigen(mxl_wtp$hessian)$values
 
 ```{r mxl_wtp_weighted}
 
-summary(mxl_wtp_weighted)
+coef(summary(mxl_wtp_weighted))
+summary(mxl_wtp_weighted)$statTable
 mxl_wtp_weighted$gradient
 eigen(mxl_wtp_weighted$hessian)$values
 

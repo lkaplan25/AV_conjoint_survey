@@ -48,7 +48,7 @@ data_dummy <- dummy_cols(choiceData, c('mode', 'automated', 'attendant')) %>%
     sharedRH_attendant_yes = mode_sharedRH*attendant_Yes,
     sharedRH_attendant_no = mode_sharedRH*attendant_No,
   ) %>% 
-  select(id, obsID, choice, weight, everything()) %>% 
+  select(id, obsID, choice, weights, everything()) %>% 
   arrange(id)
 
 data_dummy$obsID = rep(seq(nrow(data_dummy) / 4), each = 4)
@@ -90,7 +90,7 @@ mnl_dummy_WTP_weighted <- logitr(
   price = "price",
   modelSpace = "wtp",
   numMultiStarts = 10, # Use a multi-start since log-likelihood is nonconvex
-  weights = "weight",
+  weights = "weights",
   robust = TRUE,
   clusterID = "id",
   numDraws = 500
@@ -123,7 +123,7 @@ mxl_dummy <- logitr(
   pars   = c("price", "mode_bus", "mode_RH", "mode_sharedRH", "bus_automated_yes", "bus_attendant_yes", "RH_automated_yes", "RH_attendant_yes", "sharedRH_automated_yes", "sharedRH_attendant_yes", "travelTime"),
   randPars = c(price = 'n', mode_bus = 'n', mode_RH = 'n', mode_sharedRH = 'n', bus_automated_yes = 'n', bus_attendant_yes = 'n', RH_automated_yes = 'n', RH_attendant_yes = 'n', sharedRH_automated_yes = 'n', sharedRH_attendant_yes = 'n', travelTime = 'n'),
   clusterID = "id",
-  numDraws = 200
+  numDraws = 100
 )
 
 
@@ -139,7 +139,7 @@ mxl_wtp <- logitr(
   randPars = c(mode_bus = 'n', mode_RH = 'n', mode_sharedRH = 'n', bus_automated_yes = 'n', bus_attendant_yes = 'n', RH_automated_yes = 'n', RH_attendant_yes = 'n', sharedRH_automated_yes = 'n', sharedRH_attendant_yes = 'n', travelTime = 'n'),
   numMultiStarts = 10, # Use a multi-start since log-likelihood is nonconvex
   clusterID = "id",
-  numDraws = 200
+  numDraws = 100
 )
 
 mxl_wtp_weighted <- logitr(
@@ -155,12 +155,14 @@ mxl_wtp_weighted <- logitr(
   numMultiStarts = 10, # Use a multi-start since log-likelihood is nonconvex
   weights = "weights",
   robust = TRUE, 
-  #clusterID = "id"
+  clusterID = "id", 
+  numDraws = 100
 )
 
 
 
 # View summary of results
+summary(mxl_dummy)
 summary(mxl_wtp)
 summary(mxl_wtp_weighted)
 
