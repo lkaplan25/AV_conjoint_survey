@@ -14,11 +14,11 @@ library(readr)
 
 
 # Download raw data-----------
-raw_data_start_path <- read_csv(here::here("data_raw", "AV_formr_conjoint_start_v3.csv"))
-raw_data_P1 <- read_csv(here::here("data_raw", "AV_formr_conjoint_P1_v3.csv"))
-raw_data_P2 <- read_csv(here::here("data_raw", "AV_formr_conjoint_P2_v3.csv"))
-raw_data_P3 <- read_csv(here::here("data_raw", "AV_formr_conjoint_P3_v3.csv"))
-raw_data_P4 <- read_csv(here::here("data_raw", "AV_formr_conjoint_P4_v3.csv"))
+raw_data_start_path <- read_csv(here("data_raw", "AV_formr_conjoint_start_v3.csv"))
+raw_data_P1 <- read_csv(here("data_raw", "AV_formr_conjoint_P1_v3.csv"))
+raw_data_P2 <- read_csv(here("data_raw", "AV_formr_conjoint_P2_v3.csv"))
+raw_data_P3 <- read_csv(here("data_raw", "AV_formr_conjoint_P3_v3.csv"))
+raw_data_P4 <- read_csv(here("data_raw", "AV_formr_conjoint_P4_v3.csv"))
 
 
 #Format start survey
@@ -92,6 +92,16 @@ raw_data <- raw_data %>%
   inner_join(raw_data_P4, by = c("session")) %>% 
   select(session, psid, respondentID, sec_elapsed_start, everything())
 
+#check Dynata data
+
+check <- raw_data %>% 
+  select(psid, screenout, attentionScreenout, speedCheckScreenout, cbcSameScreenout, start_created, P4_ended)
+
+dynataList <- check %>% 
+  select(psid, P4_ended) %>% 
+  distinct(psid, P4_ended)
+
+write_csv(dynataList, here::here('data_processed', 'dynataList.csv')) 
 
 # Clean data-----------------
 
@@ -132,7 +142,7 @@ data_clean <- raw_data %>%
     avg_sec_cbcLastFour = as.numeric(((sec_cbc5 + sec_cbc6 + sec_cbc7 + sec_cbc8)/4), units = "secs")
   )
 
-data_clean$id = seq(nrow(data_clean)) 
+data_clean$id = seq(nrow(data_clean)) #Check this
 
 write_csv(data_clean, here::here('data_processed', 'data_clean.csv')) 
 
@@ -185,7 +195,7 @@ dim(data)
 
 data <- data %>%     
   filter(sec_elapsed_total > floor(quantile(sec_elapsed_total, .1))) 
-  #filter(sec_elapsed_total > 420) 
+#filter(sec_elapsed_total > 420) 
 dim(data)
 
 
@@ -193,13 +203,13 @@ dim(data)
 #5 - Remove too short conjoint question times
 
 
-data <- data %>%  
+data <- data %>%
   gather(
     key = "conjointQ",
     value = "conjointTime",
     sec_cbc1:sec_cbc8
   ) %>%
-  filter(conjointTime > 5) %>% 
+  filter(conjointTime > 5) %>%
   spread(
     key = conjointQ,
     value = conjointTime
@@ -259,16 +269,16 @@ data_filtered <- read_csv(here::here('data_processed', 'data_filtered.csv')) %>%
 
 data_filtered <- data_filtered %>%
   filter(genderGroup != "unknown")
-         
+
 
 dim(data_filtered)
 
 # Merge responses with survey designs to get choiceData 
 
-choiceData <- data_filtered %>% 
-  select(respondentID, cbc1:cbc8, genderGroup, incomeGroup, raceGroup, yearOfBirth, id) %>% 
+choiceData <- data_filtered %>%  
+  select(respondentID, cbc1:cbc8, genderGroup, id) %>% 
   mutate(
-    weight = ifelse(genderGroup == "B", 1.15, 0.75) # added in weights for gender
+    weights = ifelse(genderGroup == "B", 1.15, .75) # added in weights for gender, fix weights
   ) %>% 
   gather(
     key = "qID",
@@ -277,18 +287,19 @@ choiceData <- data_filtered %>%
   ) %>% 
   mutate(
     qID = str_replace(qID, "cbc", ""),
+    qID = as.numeric(qID),
     respondentID = as.numeric(respondentID)
-  ) %>% 
-  mutate(
-    qID = as.numeric(qID)
   ) %>% 
   left_join(survey, by = c("respondentID" = "respID", "qID")) %>% 
   mutate(
     choice = ifelse(selection == altID, 1, 0)
-  ) 
+  ) %>% 
+  select(-genderGroup)
+
 
 
 # Re-number obsID and respondentID
+#choiceData$obsID = rep(seq(nrow(choiceData) / 4), each = 4)
 
 id <-  sort(unique(choiceData$id))
 
@@ -297,9 +308,7 @@ temp <- data.frame(id = id, newID = seq(1:length(id)))
 choiceData <- choiceData %>% 
   left_join(temp, by = "id") %>% 
   select(-id) %>% 
-  rename(id = newID) 
-  
-
+  rename(id = newID)
 
 # Save formatted response data
 write_csv(choiceData, here::here('data_processed', 'choiceData.csv'))

@@ -1,4 +1,3 @@
-
 # Estimate multinomial logit (mnl) and mixed logit models
 
 # Load libraries
@@ -30,11 +29,11 @@ choiceData <- read_csv(here::here('data_processed', 'choiceData.csv'))
 
 
 # -----------------------------------------------------------------------------
-# Estimate MNL model where all covariates are dummy-coded
+# Estimate models where all covariates are dummy coded
 
 # Create dummy coded variables
 data_dummy <- dummy_cols(choiceData, c('mode', 'automated', 'attendant')) %>% 
-  select(-mode_rail) %>% 
+  select(-mode_rail, -imgPath) %>% 
   mutate(
     bus_automated_yes = mode_bus*automated_Yes,
     bus_automated_no = mode_bus*automated_No,
@@ -54,8 +53,6 @@ data_dummy <- dummy_cols(choiceData, c('mode', 'automated', 'attendant')) %>%
 
 data_dummy$obsID = rep(seq(nrow(data_dummy) / 4), each = 4)
 
-
-
 # Simple logit model -------
 mnl_dummy <- logitr(
   data   = data_dummy,
@@ -63,7 +60,8 @@ mnl_dummy <- logitr(
   obsID  = "obsID",
   # Remember one level must be "dummied out"
   pars   = c("mode_bus", "mode_RH", "mode_sharedRH", "bus_automated_yes", "bus_attendant_yes", "RH_automated_yes", "RH_attendant_yes", "sharedRH_automated_yes", "sharedRH_attendant_yes", "price", "travelTime"),
-  #clusterID = "id"
+  clusterID = "id",
+  numDraws = 500
 )
 
 
@@ -77,7 +75,8 @@ mnl_dummy_WTP <- logitr(
   price = "price",
   modelSpace = "wtp",
   numMultiStarts = 10, # Use a multi-start since log-likelihood is nonconvex
-  #clusterID = "id"
+  clusterID = "id",
+  numDraws = 500
 )
 
 
@@ -85,14 +84,16 @@ mnl_dummy_WTP_weighted <- logitr(
   data   = data_dummy,
   outcome = "choice",
   obsID  = "obsID",
+  panelID = "id",
   # Remember one level must be "dummied out"
   pars   = c("mode_bus", "mode_RH", "mode_sharedRH", "bus_automated_yes", "bus_attendant_yes", "RH_automated_yes", "RH_attendant_yes", "sharedRH_automated_yes", "sharedRH_attendant_yes", "travelTime"),
   price = "price",
   modelSpace = "wtp",
   numMultiStarts = 10, # Use a multi-start since log-likelihood is nonconvex
   weights = "weight",
-  # robust = TRUE,
-  # clusterID = "id"
+  robust = TRUE,
+  clusterID = "id",
+  numDraws = 500
 )
 
 # View summary of results
@@ -121,7 +122,8 @@ mxl_dummy <- logitr(
   # Remember one level must be "dummied out"
   pars   = c("price", "mode_bus", "mode_RH", "mode_sharedRH", "bus_automated_yes", "bus_attendant_yes", "RH_automated_yes", "RH_attendant_yes", "sharedRH_automated_yes", "sharedRH_attendant_yes", "travelTime"),
   randPars = c(price = 'n', mode_bus = 'n', mode_RH = 'n', mode_sharedRH = 'n', bus_automated_yes = 'n', bus_attendant_yes = 'n', RH_automated_yes = 'n', RH_attendant_yes = 'n', sharedRH_automated_yes = 'n', sharedRH_attendant_yes = 'n', travelTime = 'n'),
-  #clusterID = "id"
+  clusterID = "id",
+  numDraws = 200
 )
 
 
@@ -136,7 +138,8 @@ mxl_wtp <- logitr(
   modelSpace = "wtp",
   randPars = c(mode_bus = 'n', mode_RH = 'n', mode_sharedRH = 'n', bus_automated_yes = 'n', bus_attendant_yes = 'n', RH_automated_yes = 'n', RH_attendant_yes = 'n', sharedRH_automated_yes = 'n', sharedRH_attendant_yes = 'n', travelTime = 'n'),
   numMultiStarts = 10, # Use a multi-start since log-likelihood is nonconvex
-  #clusterID = "id"
+  clusterID = "id",
+  numDraws = 200
 )
 
 mxl_wtp_weighted <- logitr(
@@ -149,11 +152,12 @@ mxl_wtp_weighted <- logitr(
   price = "price",
   modelSpace = "wtp",
   randPars = c(mode_bus = 'n', mode_RH = 'n', mode_sharedRH = 'n', bus_automated_yes = 'n', bus_attendant_yes = 'n', RH_automated_yes = 'n', RH_attendant_yes = 'n', sharedRH_automated_yes = 'n', sharedRH_attendant_yes = 'n', travelTime = 'n'),
-  numMultiStarts = 1, # Use a multi-start since log-likelihood is nonconvex
-  weights = "weight",
+  numMultiStarts = 10, # Use a multi-start since log-likelihood is nonconvex
+  weights = "weights",
   robust = TRUE, 
-  clusterID = "id"
+  #clusterID = "id"
 )
+
 
 
 # View summary of results
@@ -162,12 +166,10 @@ summary(mxl_wtp_weighted)
 
 # Check the 1st order condition: Is the gradient at the solution zero?
 mxl_wtp$gradient
-mxl_wtp_weighted$gradient
 
 # 2nd order condition: Is the hessian negative definite?
 # (If all the eigenvalues are negative, the hessian is negative definite)
 eigen(mxl_wtp$hessian)$values
-eigen(mxl_wtp_weighted)$values
 
 ## Save model objects  -----------------------------------------------------------------------------
 
@@ -180,7 +182,6 @@ save(
   mxl_wtp_weighted,
   file = here::here("models", "mnl.RData")
 )
-
 
 # Subgroup analysis --------------------------
 

@@ -22,8 +22,8 @@ library(directlabels)
 load(here::here("models", "mnl.RData")) # Load models
 
 # Estimate WTP in WTP space model:
-coefs <- coef(mxl_wtp)
-covariance <- vcov(mxl_wtp)
+coefs <- coef(mxl_wtp) #changed
+covariance <- vcov(mxl_wtp) #changed
 wtp_draws <- as.data.frame(mvrnorm(10^4, coefs, covariance))
 
 # Computing the combinations of WTP draws
