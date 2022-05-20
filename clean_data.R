@@ -278,7 +278,7 @@ dim(data_filtered)
 choiceData <- data_filtered %>%  
   select(respondentID, cbc1:cbc8, genderGroup, id) %>% 
   mutate(
-    weights = ifelse(genderGroup == "B", 1.15, .75) # added in weights for gender, fix weights
+    weights = ifelse(genderGroup == "B", 1.15, .75) # added in weights for gender
   ) %>% 
   gather(
     key = "qID",
