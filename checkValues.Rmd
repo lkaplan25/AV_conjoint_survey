@@ -9,6 +9,13 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 
+# Load libraries
+library(logitr)
+library(fastDummies)
+library(here)
+library(tidyverse)
+library(maddTools)
+
 load(here::here("models", "mnl.RData")) # Load models
 
 ```

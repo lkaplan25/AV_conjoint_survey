@@ -172,36 +172,27 @@ pre code {
 <h1>MNL</h1>
 <div id="mnl-dummy" class="section level2">
 <h2>MNL Dummy</h2>
-<pre><code>##                   Length Class      Mode     
-## coefficients       11    -none-     numeric  
-## logLik              1    -none-     numeric  
-## nullLogLik          1    -none-     numeric  
-## gradient           11    -none-     numeric  
-## hessian           121    -none-     numeric  
-## probabilities       2    data.frame list     
-## fitted.values       2    data.frame list     
-## residuals           2    data.frame list     
-## startPars          11    -none-     numeric  
-## multistartNumber    1    -none-     numeric  
-## multistartSummary   0    -none-     NULL     
-## time                5    proc_time  numeric  
-## iterations          1    -none-     numeric  
-## message             1    -none-     character
-## status              1    -none-     numeric  
-## call                7    -none-     call     
-## inputs             20    -none-     list     
-## data                7    -none-     list     
-## numObs              1    -none-     numeric  
-## numParams           1    -none-     numeric  
-## freq                4    -none-     numeric  
-## modelType           1    -none-     character
-## weightsUsed         1    -none-     logical  
-## numClusters         1    -none-     numeric  
-## parSetup           11    -none-     character
-## parIDs              4    -none-     list     
-## scaleFactors       11    -none-     numeric  
-## standardDraws       0    -none-     NULL     
-## options             7    -none-     list</code></pre>
+<pre><code>##                           Estimate  Std. Error     z-value     Pr(&gt;|z|)
+## mode_bus               -0.28935160 0.040642430  -7.1194464 1.083578e-12
+## mode_RH                 0.09024375 0.050888590   1.7733592 7.616920e-02
+## mode_sharedRH          -0.35732931 0.048570872  -7.3568643 1.882938e-13
+## bus_automated_yes       0.04911813 0.057899586   0.8483330 3.962525e-01
+## bus_attendant_yes       0.74525436 0.063156419  11.8001364 0.000000e+00
+## RH_automated_yes        0.03735455 0.061870294   0.6037558 5.460060e-01
+## RH_attendant_yes        0.81576501 0.065074515  12.5358599 0.000000e+00
+## sharedRH_automated_yes  0.19066386 0.062512354   3.0500188 2.288270e-03
+## sharedRH_attendant_yes  0.62860382 0.066715278   9.4221869 0.000000e+00
+## price                  -0.08226977 0.005431008 -15.1481596 0.000000e+00
+## travelTime             -0.03896645 0.001980003 -19.6799952 0.000000e+00</code></pre>
+<pre><code>##                                      
+## Log-Likelihood:         -1.822074e+04
+## Null Log-Likelihood:    -1.925286e+04
+## AIC:                     3.646349e+04
+## BIC:                     3.654641e+04
+## McFadden R2:             5.360829e-02
+## Adj McFadden R2:         5.303695e-02
+## Number of Observations:  1.388800e+04
+## Number of Clusters       1.736000e+03</code></pre>
 <pre><code>##                               [,1]
 ## mode_bus                0.20546813
 ## mode_RH                 0.26865959
@@ -220,36 +211,27 @@ pre code {
 </div>
 <div id="mnl-wtp" class="section level2">
 <h2>MNL WTP</h2>
-<pre><code>##                   Length Class      Mode     
-## coefficients       11    -none-     numeric  
-## logLik              1    -none-     numeric  
-## nullLogLik          1    -none-     numeric  
-## gradient           11    -none-     numeric  
-## hessian           121    -none-     numeric  
-## probabilities       2    data.frame list     
-## fitted.values       2    data.frame list     
-## residuals           2    data.frame list     
-## startPars          11    -none-     numeric  
-## multistartNumber    1    -none-     numeric  
-## multistartSummary   3    data.frame list     
-## time                5    proc_time  numeric  
-## iterations          1    -none-     numeric  
-## message             1    -none-     character
-## status              1    -none-     numeric  
-## call               10    -none-     call     
-## inputs             20    -none-     list     
-## data                7    -none-     list     
-## numObs              1    -none-     numeric  
-## numParams           1    -none-     numeric  
-## freq                4    -none-     numeric  
-## modelType           1    -none-     character
-## weightsUsed         1    -none-     logical  
-## numClusters         1    -none-     numeric  
-## parSetup           11    -none-     character
-## parIDs              6    -none-     list     
-## scaleFactors       11    -none-     numeric  
-## standardDraws       0    -none-     NULL     
-## options             7    -none-     list</code></pre>
+<pre><code>##                           Estimate Std. Error     z-value     Pr(&gt;|z|)
+## lambda                  0.08226162 0.00543507  15.1353373 0.000000e+00
+## mode_bus               -3.51361332 0.52202555  -6.7307306 1.688139e-11
+## mode_RH                 1.10327413 0.58885560   1.8735903 6.098692e-02
+## mode_sharedRH          -4.34242251 0.71166777  -6.1017552 1.049100e-09
+## bus_automated_yes       0.60277197 0.70615256   0.8536002 3.933266e-01
+## bus_attendant_yes       9.05528577 0.98805087   9.1647971 0.000000e+00
+## RH_automated_yes        0.45030550 0.75434872   0.5969461 5.505434e-01
+## RH_attendant_yes        9.91726363 1.00375360   9.8801774 0.000000e+00
+## sharedRH_automated_yes  2.32195973 0.78349126   2.9636064 3.040569e-03
+## sharedRH_attendant_yes  7.63736484 0.94823708   8.0542778 8.881784e-16
+## travelTime             -0.47407120 0.03555501 -13.3334583 0.000000e+00</code></pre>
+<pre><code>##                                      
+## Log-Likelihood:         -1.822074e+04
+## Null Log-Likelihood:    -1.925286e+04
+## AIC:                     3.646349e+04
+## BIC:                     3.654641e+04
+## McFadden R2:             5.360830e-02
+## Adj McFadden R2:         5.303695e-02
+## Number of Observations:  1.388800e+04
+## Number of Clusters       1.736000e+03</code></pre>
 <pre><code>##                                [,1]
 ##                        -1.569806700
 ## mode_bus               -0.007224202
@@ -268,36 +250,27 @@ pre code {
 </div>
 <div id="mnl-wtp-weighted" class="section level2">
 <h2>MNL WTP Weighted</h2>
-<pre><code>##                   Length Class      Mode     
-## coefficients       11    -none-     numeric  
-## logLik              1    -none-     numeric  
-## nullLogLik          1    -none-     numeric  
-## gradient           11    -none-     numeric  
-## hessian           121    -none-     numeric  
-## probabilities       2    data.frame list     
-## fitted.values       2    data.frame list     
-## residuals           2    data.frame list     
-## startPars          11    -none-     numeric  
-## multistartNumber    1    -none-     numeric  
-## multistartSummary   3    data.frame list     
-## time                5    proc_time  numeric  
-## iterations          1    -none-     numeric  
-## message             1    -none-     character
-## status              1    -none-     numeric  
-## call               13    -none-     call     
-## inputs             20    -none-     list     
-## data                7    -none-     list     
-## numObs              1    -none-     numeric  
-## numParams           1    -none-     numeric  
-## freq                4    -none-     numeric  
-## modelType           1    -none-     character
-## weightsUsed         1    -none-     logical  
-## numClusters         1    -none-     numeric  
-## parSetup           11    -none-     character
-## parIDs              6    -none-     list     
-## scaleFactors       11    -none-     numeric  
-## standardDraws       0    -none-     NULL     
-## options             7    -none-     list</code></pre>
+<pre><code>##                          Estimate  Std. Error     z-value     Pr(&gt;|z|)
+## lambda                  0.0862794 0.005904756  14.6118474 0.000000e+00
+## mode_bus               -3.3918566 0.519803428  -6.5252679 6.788015e-11
+## mode_RH                 1.2021570 0.585576395   2.0529466 4.007776e-02
+## mode_sharedRH          -4.0844655 0.711783664  -5.7383524 9.560202e-09
+## bus_automated_yes      -0.2098247 0.730858126  -0.2870936 7.740407e-01
+## bus_attendant_yes       8.2278083 1.001731717   8.2135847 2.220446e-16
+## RH_automated_yes       -0.1465434 0.771424705  -0.1899646 8.493368e-01
+## RH_attendant_yes        8.9358254 1.010295810   8.8447614 0.000000e+00
+## sharedRH_automated_yes  1.3324492 0.798614644   1.6684507 9.522629e-02
+## sharedRH_attendant_yes  7.2453098 0.989869024   7.3194631 2.489120e-13
+## travelTime             -0.4708391 0.035990084 -13.0824665 0.000000e+00</code></pre>
+<pre><code>##                                      
+## Log-Likelihood:         -1.671404e+04
+## Null Log-Likelihood:    -1.764697e+04
+## AIC:                     3.345008e+04
+## BIC:                     3.353301e+04
+## McFadden R2:             5.286637e-02
+## Adj McFadden R2:         5.224304e-02
+## Number of Observations:  1.388800e+04
+## Number of Clusters       1.736000e+03</code></pre>
 <pre><code>##                                 [,1]
 ##                        -0.4713595865
 ## mode_bus               -0.0013564087
@@ -319,36 +292,38 @@ pre code {
 <h1>MXL</h1>
 <div id="mxl_dummy" class="section level2">
 <h2>MXL_dummy</h2>
-<pre><code>##                   Length Class      Mode     
-## coefficients        22   -none-     numeric  
-## logLik               1   -none-     numeric  
-## nullLogLik           1   -none-     numeric  
-## gradient            22   -none-     numeric  
-## hessian            484   -none-     numeric  
-## probabilities        2   data.frame list     
-## fitted.values        2   data.frame list     
-## residuals            2   data.frame list     
-## startPars           22   -none-     numeric  
-## multistartNumber     1   -none-     numeric  
-## multistartSummary    0   -none-     NULL     
-## time                 5   proc_time  numeric  
-## iterations           1   -none-     numeric  
-## message              1   -none-     character
-## status               1   -none-     numeric  
-## call                 9   -none-     call     
-## inputs              20   -none-     list     
-## data                 7   -none-     list     
-## numObs               1   -none-     numeric  
-## numParams            1   -none-     numeric  
-## freq                 4   -none-     numeric  
-## modelType            1   -none-     character
-## weightsUsed          1   -none-     logical  
-## numClusters          1   -none-     numeric  
-## parSetup            11   -none-     character
-## parIDs               4   -none-     list     
-## scaleFactors        22   -none-     numeric  
-## standardDraws     1100   -none-     numeric  
-## options              7   -none-     list</code></pre>
+<pre><code>##                                 Estimate  Std. Error     z-value     Pr(&gt;|z|)
+## price_mu                     -0.13206638 0.009552609 -13.8251638 0.000000e+00
+## mode_bus_mu                  -0.55166173 0.056292785  -9.7998658 0.000000e+00
+## mode_RH_mu                    0.17784288 0.070306740   2.5295282 1.142160e-02
+## mode_sharedRH_mu             -0.36631722 0.061843551  -5.9232889 3.155657e-09
+## bus_automated_yes_mu         -0.06486511 0.080982749  -0.8009744 4.231465e-01
+## bus_attendant_yes_mu          1.04947943 0.103084617  10.1807570 0.000000e+00
+## RH_automated_yes_mu          -0.41352759 0.104312646  -3.9643092 7.360879e-05
+## RH_attendant_yes_mu           0.91501361 0.119160501   7.6788332 1.598721e-14
+## sharedRH_automated_yes_mu    -0.42193394 0.114753306  -3.6768783 2.361056e-04
+## sharedRH_attendant_yes_mu     0.19148339 0.139088544   1.3767014 1.686046e-01
+## travelTime_mu                -0.04596853 0.003184048 -14.4371357 0.000000e+00
+## price_sigma                   0.27283826 0.011081094  24.6219610 0.000000e+00
+## mode_bus_sigma                1.05531499 0.075352678  14.0050098 0.000000e+00
+## mode_RH_sigma                 0.54372461 0.109005423   4.9880510 6.099147e-07
+## mode_sharedRH_sigma           1.03132861 0.064817360  15.9113023 0.000000e+00
+## bus_automated_yes_sigma      -1.15457330 0.125818482  -9.1765000 0.000000e+00
+## bus_attendant_yes_sigma      -1.96729505 0.285212170  -6.8976546 5.286882e-12
+## RH_automated_yes_sigma       -1.57144538 0.100890544 -15.5757449 0.000000e+00
+## RH_attendant_yes_sigma       -1.86235614 0.131204753 -14.1942735 0.000000e+00
+## sharedRH_automated_yes_sigma -1.34268878 0.088278080 -15.2097642 0.000000e+00
+## sharedRH_attendant_yes_sigma -1.61830247 0.107720682 -15.0231361 0.000000e+00
+## travelTime_sigma              0.06563996 0.004103345  15.9966968 0.000000e+00</code></pre>
+<pre><code>##                                      
+## Log-Likelihood:         -1.642594e+04
+## Null Log-Likelihood:    -1.925286e+04
+## AIC:                     3.289588e+04
+## BIC:                     3.306174e+04
+## McFadden R2:             1.468309e-01
+## Adj McFadden R2:         1.456882e-01
+## Number of Observations:  1.388800e+04
+## Number of Clusters       1.736000e+03</code></pre>
 <pre><code>##               [,1]
 ##  [1,] -1.397034636
 ##  [2,] -0.027556465
@@ -380,36 +355,37 @@ pre code {
 </div>
 <div id="mxl-wtp" class="section level2">
 <h2>MXL WTP</h2>
-<pre><code>##                   Length Class      Mode     
-## coefficients        21   -none-     numeric  
-## logLik               1   -none-     numeric  
-## nullLogLik           1   -none-     numeric  
-## gradient            21   -none-     numeric  
-## hessian            441   -none-     numeric  
-## probabilities        2   data.frame list     
-## fitted.values        2   data.frame list     
-## residuals            2   data.frame list     
-## startPars           21   -none-     numeric  
-## multistartNumber     1   -none-     numeric  
-## multistartSummary    3   data.frame list     
-## time                 5   proc_time  numeric  
-## iterations           1   -none-     numeric  
-## message              1   -none-     character
-## status               1   -none-     numeric  
-## call                12   -none-     call     
-## inputs              20   -none-     list     
-## data                 7   -none-     list     
-## numObs               1   -none-     numeric  
-## numParams            1   -none-     numeric  
-## freq                 4   -none-     numeric  
-## modelType            1   -none-     character
-## weightsUsed          1   -none-     logical  
-## numClusters          1   -none-     numeric  
-## parSetup            11   -none-     character
-## parIDs               6   -none-     list     
-## scaleFactors        21   -none-     numeric  
-## standardDraws     1100   -none-     numeric  
-## options              7   -none-     list</code></pre>
+<pre><code>##                                 Estimate  Std. Error      z-value     Pr(&gt;|z|)
+## lambda                         0.1237431 0.007793266  15.87820256 0.000000e+00
+## mode_bus_mu                   -2.3807156 0.417173465  -5.70677624 1.151360e-08
+## mode_RH_mu                     2.2214759 0.518104896   4.28769520 1.805366e-05
+## mode_sharedRH_mu              -4.2365938 0.653322913  -6.48468582 8.891687e-11
+## bus_automated_yes_mu          -0.0223743 0.616719650  -0.03627954 9.710595e-01
+## bus_attendant_yes_mu           5.9267312 0.842396350   7.03556132 1.984635e-12
+## RH_automated_yes_mu           -3.1388687 0.841265879  -3.73112569 1.906261e-04
+## RH_attendant_yes_mu            7.1904309 1.019091377   7.05572734 1.717071e-12
+## sharedRH_automated_yes_mu      1.2849110 0.762612884   1.68487971 9.201178e-02
+## sharedRH_attendant_yes_mu      4.2026364 1.009713626   4.16220625 3.151875e-05
+## travelTime_mu                 -0.3422265 0.027601433 -12.39886677 0.000000e+00
+## mode_bus_sigma                 7.6351948 0.717007879  10.64869020 0.000000e+00
+## mode_RH_sigma                -10.5731349 0.734841354 -14.38832317 0.000000e+00
+## mode_sharedRH_sigma           11.1228873 0.863048750  12.88790157 0.000000e+00
+## bus_automated_yes_sigma       -4.4899869 1.259369668  -3.56526525 3.634884e-04
+## bus_attendant_yes_sigma      -15.5700365 1.480146054 -10.51925687 0.000000e+00
+## RH_automated_yes_sigma       -15.5782077 1.117374740 -13.94179336 0.000000e+00
+## RH_attendant_yes_sigma       -16.9853269 1.440209826 -11.79364743 0.000000e+00
+## sharedRH_automated_yes_sigma  10.4190621 0.932949756  11.16787059 0.000000e+00
+## sharedRH_attendant_yes_sigma -10.2659715 1.264027491  -8.12163625 4.440892e-16
+## travelTime_sigma               0.5433469 0.042084990  12.91070410 0.000000e+00</code></pre>
+<pre><code>##                                      
+## Log-Likelihood:         -1.659202e+04
+## Null Log-Likelihood:    -1.925286e+04
+## AIC:                     3.322605e+04
+## BIC:                     3.338436e+04
+## McFadden R2:             1.382046e-01
+## Adj McFadden R2:         1.371138e-01
+## Number of Observations:  1.388800e+04
+## Number of Clusters       1.736000e+03</code></pre>
 <pre><code>##                [,1]
 ##  [1,] -3.547387e+00
 ##  [2,]  1.005126e-02
@@ -440,36 +416,37 @@ pre code {
 </div>
 <div id="mxl-wtp-weighted" class="section level2">
 <h2>MXL WTP Weighted</h2>
-<pre><code>##                   Length Class      Mode     
-## coefficients        21   -none-     numeric  
-## logLik               1   -none-     numeric  
-## nullLogLik           1   -none-     numeric  
-## gradient            21   -none-     numeric  
-## hessian            441   -none-     numeric  
-## probabilities        2   data.frame list     
-## fitted.values        2   data.frame list     
-## residuals            2   data.frame list     
-## startPars           21   -none-     numeric  
-## multistartNumber     1   -none-     numeric  
-## multistartSummary    3   data.frame list     
-## time                 5   proc_time  numeric  
-## iterations           1   -none-     numeric  
-## message              1   -none-     character
-## status               1   -none-     numeric  
-## call                14   -none-     call     
-## inputs              20   -none-     list     
-## data                 7   -none-     list     
-## numObs               1   -none-     numeric  
-## numParams            1   -none-     numeric  
-## freq                 4   -none-     numeric  
-## modelType            1   -none-     character
-## weightsUsed          1   -none-     logical  
-## numClusters          1   -none-     numeric  
-## parSetup            11   -none-     character
-## parIDs               6   -none-     list     
-## scaleFactors        21   -none-     numeric  
-## standardDraws     1100   -none-     numeric  
-## options              7   -none-     list</code></pre>
+<pre><code>##                                 Estimate  Std. Error     z-value     Pr(&gt;|z|)
+## lambda                         0.1290531 0.008021613  16.0881683 0.000000e+00
+## mode_bus_mu                   -3.9619906 0.477702911  -8.2938381 0.000000e+00
+## mode_RH_mu                     0.7155417 0.525761019   1.3609637 1.735252e-01
+## mode_sharedRH_mu              -2.8160668 0.581190993  -4.8453380 1.263963e-06
+## bus_automated_yes_mu          -0.3751017 0.624022935  -0.6011024 5.477718e-01
+## bus_attendant_yes_mu           4.6638211 0.819830478   5.6887627 1.279631e-08
+## RH_automated_yes_mu           -2.7572976 0.778734280  -3.5407425 3.990027e-04
+## RH_attendant_yes_mu            9.6071500 1.002218720   9.5858816 0.000000e+00
+## sharedRH_automated_yes_mu      1.1046445 0.718553863   1.5373162 1.242159e-01
+## sharedRH_attendant_yes_mu      8.1786653 0.984486169   8.3075472 0.000000e+00
+## travelTime_mu                 -0.3920812 0.029904316 -13.1111914 0.000000e+00
+## mode_bus_sigma                -7.4374650 0.608692550 -12.2187548 0.000000e+00
+## mode_RH_sigma                -10.9555265 0.710639761 -15.4164278 0.000000e+00
+## mode_sharedRH_sigma           11.0310017 0.830581974  13.2810512 0.000000e+00
+## bus_automated_yes_sigma        2.7363608 1.685926623   1.6230604 1.045765e-01
+## bus_attendant_yes_sigma      -14.8845872 1.304238313 -11.4124751 0.000000e+00
+## RH_automated_yes_sigma       -11.0655639 1.038873155 -10.6515062 0.000000e+00
+## RH_attendant_yes_sigma        12.2098496 1.852581865   6.5907207 4.376965e-11
+## sharedRH_automated_yes_sigma   8.3497636 1.126479803   7.4122621 1.241229e-13
+## sharedRH_attendant_yes_sigma  15.3164914 1.525122539  10.0427940 0.000000e+00
+## travelTime_sigma               0.5442026 0.040933863  13.2946808 0.000000e+00</code></pre>
+<pre><code>##                                      
+## Log-Likelihood:         -1.510804e+04
+## Null Log-Likelihood:    -1.764697e+04
+## AIC:                     3.025809e+04
+## BIC:                     3.041640e+04
+## McFadden R2:             1.438734e-01
+## Adj McFadden R2:         1.426834e-01
+## Number of Observations:  1.388800e+04
+## Number of Clusters       1.736000e+03</code></pre>
 <pre><code>##               [,1]
 ##  [1,] -0.047253257
 ##  [2,] -0.002375810
