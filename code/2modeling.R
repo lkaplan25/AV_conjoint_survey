@@ -1,4 +1,5 @@
-# Estimate multinomial logit (mnl) and mixed logit models
+# Estimate mixed logit (mxl) models
+# NOTE: The mxl models take a while (over an hour each) to run. We recommend running the code overnight.
 
 # Load libraries and settings
 source(here::here('code', '0setup.R'))
@@ -76,71 +77,6 @@ randPars = c(
   mode_sharedRH = 'n', sharedRH_automated_yes = 'n', sharedRH_attendant_yes = 'n'
 )
 
-# Simple logit model -------
-mnl_pref <- logitr(
-  data      = data,
-  outcome   = "choice",
-  obsID     = "obsID",
-  clusterID = "id",
-  pars      = pars_pref
-)
-
-# Estimate a simple logit model in WTP space
-mnl_wtp <- logitr(
-  data       = data,
-  outcome    = "choice",
-  obsID      = "obsID",
-  clusterID  = "id",
-  modelSpace = "wtp",
-  price      = "price",
-  pars       = pars_wtp,
-  numCores   = numCores,
-  numMultiStarts = numMultiStarts
-)
-
-mnl_wtp_weighted <- logitr(
-  data       = data,
-  outcome    = "choice",
-  obsID      = "obsID",
-  clusterID  = "id",
-  modelSpace = "wtp",
-  price      = "price",
-  pars       = pars_wtp,
-  weights    = "weights",
-  numCores   = numCores,
-  numMultiStarts = numMultiStarts
-)
-
-# View summary of results
-summary(mnl_pref)
-summary(mnl_wtp)
-summary(mnl_wtp_weighted)
-
-# Weights have little effect on WTP
-wtpCompare(mnl_pref, mnl_wtp, "price")
-wtpCompare(mnl_pref, mnl_wtp_weighted, "price")
-
-# Check the 1st order condition: Is the gradient at the solution zero?
-mnl_pref$gradient
-mnl_wtp$gradient
-mnl_wtp_weighted$gradient
-
-# 2nd order condition: Is the hessian negative definite?
-# (If all the eigenvalues are negative, the hessian is negative definite)
-eigen(mnl_pref$hessian)$values
-eigen(mnl_wtp$hessian)$values
-eigen(mnl_wtp_weighted$hessian)$values
-
-
-# Save models them remove to free up memory
-save(
-  mnl_pref, mnl_wtp, mnl_wtp_weighted,
-  file = here::here("models_lk", "mnl.RData") #changed to avoid overwriting
-)
-rm(mnl_pref, mnl_wtp, mnl_wtp_weighted)
-gc() # garbage collect to free up memory
-
-
 
 # Mixed logit models ----------
 
@@ -191,7 +127,7 @@ mxl_wtp_weighted <- logitr(
 # Save
 save(
   mxl_pref, mxl_wtp, mxl_wtp_weighted, 
-  file = here::here("models_lk", "mxl.RData") #changed to avoid overwriting
+  file = here::here("models", "mxl.RData") 
 )
 rm(mxl_pref, mxl_wtp, mxl_wtp_weighted)
 gc()
@@ -279,5 +215,5 @@ eigen(mxl_wtp_B$hessian)$values
 
 save(
   mxl_wtp_A, mxl_wtp_B,
-  file = here("models_lk", "mxl_gender.RData") #changed to avoid overwriting
+  file = here("models", "mxl_gender.RData") 
 )
