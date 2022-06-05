@@ -2,10 +2,8 @@
 source(here::here('code', '0setup.R'))
 
 # Load models
-load(here::here("models", "mnl.RData"))
 load(here::here("models", "mxl.RData"))
-load(here::here("models", "mnl_gender.RData"))
-load(here::here("models_lk", "mxl_gender.RData"))
+load(here::here("models", "mxl_gender.RData"))
 
 # Visualize results of estimated mixed logit WTP space model
 
@@ -13,8 +11,8 @@ load(here::here("models_lk", "mxl_gender.RData"))
 # Get WTP estimates with 95% CI
 
 # Estimate WTP in WTP space model:
-coefs <- coef(mxl_wtp_weighted) #changed
-covariance <- vcov(mxl_wtp_weighted) #changed
+coefs <- coef(mxl_wtp)
+covariance <- vcov(mxl_wtp) 
 wtp_draws <- as.data.frame(mvrnorm(10^4, coefs, covariance))
 
 # Computing the combinations of WTP draws
