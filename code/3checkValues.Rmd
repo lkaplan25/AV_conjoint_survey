@@ -1,0 +1,76 @@
+---
+title: "Testing Models - Public Repo"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load libraries and settings
+source(here::here('code', '0setup.R'))
+
+# Load models
+load(here::here("models", "mnl.RData")) 
+load(here::here("models", "mxl.RData")) 
+load(here::here("models", "mnl_gender.RData"))
+
+# Function for printing summary & gradient
+print_summary <- function(x) {
+  print(summary(x))
+  print(matrix(x$gradient))
+}
+```
+
+# Multinomial logit models (MNL)
+
+## MNL Preference
+
+```{r mnl_pref}
+print_summary(mnl_pref)
+```
+
+## MNL WTP
+
+```{r mnl_wtp, echo=FALSE}
+print_summary(mnl_wtp)
+```
+
+## MNL WTP Weighted
+
+```{r mnl_wtp_weighted}
+print_summary(mnl_wtp_weighted)
+```
+
+# Mixed logit models (MXL)
+
+## MXL Preference
+
+```{r mxl_pref}
+print_summary(mxl_pref)
+```
+
+## MXL WTP
+
+```{r mxl_wtp}
+print_summary(mxl_wtp)
+```
+
+## MXL WTP Weighted
+
+```{r mxl_wtp_weighted}
+print_summary(mxl_wtp_weighted)
+```
+
+# MNL models by gender
+
+## Male 
+
+```{r mnl_wtp_A}
+print_summary(mnl_wtp_A)
+```
+
+## Female, transgender, non-binary
+
+```{r mnl_wtp_B}
+print_summary(mnl_wtp_B)
+```
