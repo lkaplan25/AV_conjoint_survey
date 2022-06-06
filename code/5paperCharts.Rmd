@@ -1,0 +1,382 @@
+---
+title: "paper charts"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE, echo = FALSE}
+knitr::opts_chunk$set(fig.width=6, fig.height=4,warning=FALSE, message=FALSE)
+
+library(plyr)
+#library(formr)
+library(tidyverse)
+library(magrittr)
+options(dplyr.width = Inf)
+library(lubridate)
+library(likert)
+library(here)
+library(janitor)
+library(readr)
+library(forcats)
+library(cowplot)
+library(ggrepel)
+library(dplyr)
+library(ggplot2)
+library(gtsummary)
+library(knitr)
+library(flextable)
+library(kableExtra)
+library(conjointTools)
+library(logitr)
+
+
+
+
+
+plotColors = c('sienna','#e2a8a6' , 'grey60','lightsteelblue', 'steelblue')
+base = 7
+
+old <- theme_set(theme_minimal_hgrid(font_family = 'Helvetica',
+        font_size = base * 1.05)) 
+
+theme_update(plot.title = element_text(
+           family = "Roboto Black",
+            size = base * 1.5),
+           legend.position = "none")
+
+data_filtered <- read_csv(here::here('data_processed', 'data_filtered.csv'))
+
+load(here::here("models", "mxl.RData")) # Load models
+load(here::here("models", "mxl_gender.RData")) # Load gender models
+
+```
+
+Data of filtered sample
+```{r demographics}
+
+data_filtered <- data_filtered %>% 
+  filter(genderGroup != "unknown") %>% 
+         #!is.na(yearOfBirth), yearOfBirth != "prefer_not_say", incomeGroup != "unknown") %>%
+  mutate(
+    income = case_when(
+      income %in% c("under10", "inc_10to15") ~ "inc_under15",
+      income %in% c("inc_150to200", "inc_over200") ~ "inc_over150",
+      TRUE ~ income
+    )
+  )
+
+set_gtsummary_theme(theme_gtsummary_compact())
+
+ageGroups <- data_filtered %>% 
+  mutate(
+    age = 2021 - as.numeric(yearOfBirth),
+    ageGroups = case_when(
+     age <= 24 ~ "18-24",
+     (age > 24 & age <= 34) ~ "25-34",
+     (age > 34 & age <= 44) ~ "35-44",
+     (age > 44 & age <= 54) ~ "45-54",
+     (age > 54 & age <= 64) ~ "55-64",
+     (age > 64 & age <= 74) ~ "65-74",
+     (age > 74 & age <= 84) ~ "75-84",
+     age > 84 ~ "85+"
+    )
+    ) %>% 
+  select(yearOfBirth, age, ageGroups)
+  
+ageGroups  %>% 
+  gtsummary::tbl_summary(label = list(ageGroups ~ "Age"))
+
+
+
+demoSummary <- data_filtered %>% 
+  mutate(
+    income = fct_relevel(income, "inc_under15", "inc_15to25", "inc_25to35", "inc_35to50", "inc_50to75", "inc_75to100", "inc_100to150", "inc_over150"),
+    gender = fct_relevel(gender, "male", "female"),
+    income = recode_factor(data_filtered$income, "inc_under15" = "Less than $15,000", "inc_15to25" = "$15,000 - $24,999", "inc_25to35" = "$25,000 - $34,999", "inc_35to50" = "$35,000 - $49,999", "inc_50to75" = "$50,000 - $74,999", "inc_75to100" = "$75,000 - $99,999", "inc_100to150" = "$100,000 - $149,999", "inc_over150" = "$150,000 or more"),
+    gender = case_when(
+      gender == "male" ~ "Male",
+      gender == "female" ~ "Female",
+      gender %in% c("transMale", "transFemale", "genderNonconform") ~ "Transgender/Gender Non-conforming"),
+    education = case_when(
+      education %in% c("no_hs", "hs") ~ "No High school or High School",
+      education %in% c("college_some", "vocational", "degree_associate") ~ "Some College/Associate's",
+      education == "degree_bs" ~ "Bachelor's degree",
+      education == "degree_grad" ~ "Graduate or Professional Degree"
+    ),
+     education = fct_relevel(education, "No High school or High School", "Some College/Associate's", "Bachelor's degree", "Graduate or Professional Degree"),
+    bankAccountAccess = recode_factor(data_filtered$bankAccountAccess, no = "No", yes = "Yes", nonreg = "Doesn't use regularly"),
+    phoneAccess = recode_factor(data_filtered$phoneAccess, noPhone = "No cellphone", nonSmartphone = "No smartphone", smartphone = "Has smartphone"),
+    disability = case_when(
+      disability %in% c("none", "intellectual, none", "physical, none", "physical, visual, intellectual, none", "visual, none") ~ "None",
+      disability == "intellectual" ~ "Intellectual",
+      disability %in% c("physical", "physical, intellectual") ~ "Physical",
+      disability %in% c('visual', 'visual, intellectual') ~ "Visual",
+      disability == "physical, visual" ~ "Physical and Visual"
+    ),
+    disability = fct_relevel(disability, "None", "Intellectual", "Physical", "Visual", "Physical and Visual"),
+    age = 2021 - as.numeric(yearOfBirth),
+    ageGroups = case_when(
+     age <= 24 ~ "18-24",
+     (age > 24 & age <= 34) ~ "25-34",
+     (age > 34 & age <= 44) ~ "35-44",
+     (age > 44 & age <= 54) ~ "45-54",
+     (age > 54 & age <= 64) ~ "55-64",
+     (age > 64 & age <= 74) ~ "65-74",
+     (age > 74 & age <= 84) ~ "75-84",
+     age > 84 ~ "85+"
+    )
+    ) %>% 
+  select(gender, ageGroups, income, education, bankAccountAccess, phoneAccess, disability) 
+
+demoSummary %>% 
+  gtsummary::tbl_summary(label = list(gender ~ "Gender", ageGroups ~ "Age", income ~ "Annual Household Income", education ~ "Education", bankAccountAccess ~ "Bank Account Access", phoneAccess ~ "Phone Access", disability ~ "Disability")) %>% 
+  as_flex_table(
+  include = everything(),
+  return_calls = FALSE,
+  strip_md_bold = TRUE
+)
+
+
+
+```
+
+```{r target demographics}
+
+target_gender <- read_csv(here::here('data_processed', 'MWCOG_genderGroups.csv')) %>% 
+  filter(gender != "not_reported") 
+
+target_gender <- target_gender %>% 
+  mutate(
+    percent_recalc_gender = round((wgtFrequency/sum(wgtFrequency)*100),1),
+    gender = case_when(
+      gender == "female" ~ 1,
+      TRUE ~ 0
+    )
+  ) %>% 
+  select(gender, percent_recalc_gender)
+
+target_gender %>% 
+  kable()
+
+
+target_ageGroup <- read_csv(here::here('data_processed', 'MWCOG_ageGroup.csv')) %>% 
+  filter(ageGroup %in% c("age_18to24", "age_25to34", "age_35to44","age_45to54","age_55to64","age_65to74", "age_75to84","age_over85")) 
+  
+target_ageGroup <- target_ageGroup %>% 
+  mutate(
+    percent_recalc_age = round((wgtFrequency/sum(wgtFrequency)*100), 1)
+  ) %>% 
+  select(ageGroup, percent_recalc_age)
+
+target_ageGroup %>% 
+  kable()
+         
+target_income <- read_csv(here::here('data_processed', 'MWCOG_income.csv')) %>% 
+  mutate(
+    percent_income = round(percent,1)
+  ) %>%
+  select(income, percent_income)
+
+target_income %>% 
+  kable()
+
+```
+
+
+
+```{r makeTableFunction}
+
+make_coef_table <- function(model) {
+
+  summary <- coef(summary(model)) %>%
+    round(3) %>%
+    rownames_to_column() %>%
+    dplyr::rename(
+      "coefficients" = "rowname",
+      "prob" = "Pr(>|z|)") %>%
+    mutate(
+      sig = ifelse(
+        prob <= 0.001,'***', ifelse(
+        prob > 0.001 & prob <= 0.01, '**', ifelse(
+        prob > 0.01 & prob <= 0.05, '*', ifelse(
+        prob > 0.05 & prob <= 0.1, '.', '   ')))),
+      sig2 = ifelse(
+        prob <= 0.001,'***', ifelse(
+          prob > 0.001 & prob <= 0.01, '&nbsp;**', ifelse(
+            prob > 0.01 & prob <= 0.05, '&nbsp;&nbsp;*', ifelse(
+              prob > 0.05 & prob <= 0.1, '&nbsp;&nbsp;&nbsp;.', "&nbsp;&nbsp;&nbsp;&nbsp;"))))
+    ) %>%
+    mutate(
+      Estimate = sprintf("%.3f", Estimate),
+      `Std. Error` = sprintf("%.3f", `Std. Error`),
+      table_format = ifelse(nchar(`Std. Error`) == 6 ,paste0(Estimate, " (", `Std. Error`, ") ", sig),
+                            paste0(Estimate, "  (", `Std. Error`, ") ", sig)),
+      table_format2 = ifelse(nchar(`Std. Error`) == 6 ,paste0(Estimate, " (", `Std. Error`, ") ", sig2),
+                             paste0(Estimate, " (", `Std. Error`, ") ", sig2))
+    ) %>%
+    select("coefficients", "table_format2" )
+    return(summary)
+}
+
+```
+
+
+
+```{r modelResults}
+# Make coefficient tables
+results_mxl <- make_coef_table(mxl_wtp) %>%
+  mutate(coefficients = recode_factor(coefficients,
+                           "travelTime_mu" = "travelTime",
+                        "mode_bus_mu" = "mode_bus",
+                          "mode_RH_mu" = "mode_RH",
+                         "mode_sharedRH_mu" = "mode_sharedRH" ,
+                         "bus_automated_yes_mu" = "bus_automated_yes",
+                        "bus_attendant_yes_mu" = "bus_attendant_yes",
+                         "RH_automated_yes_mu" = "RH_automated_yes",
+                        "RH_attendant_yes_mu" = "RH_attendant_yes",
+                        "sharedRH_automated_yes_mu" = "sharedRH_automated_yes",
+                        "sharedRH_attendant_yes_mu" = "sharedRH_attendant_yes")
+  )
+
+results_mxl_M <- make_coef_table(mxl_wtp_A)
+results_mxl_F <- make_coef_table(mxl_wtp_B)
+
+#join
+#summary_final <- results_MNL %>%
+  # full_join(results_MXL, by = "coefficients") %>%
+  # full_join(results_mnl_M, by = "coefficients") %>%
+  # full_join(results_mnl_F, by = "coefficients")  %>%
+  # mutate(
+  #   coefficients = as.factor(coefficients),
+  #   coefficients = coefficients %>% fct_relevel("lambda",
+  #                              "travelTime_mu", "travelTime_sigma" ,
+  #                              "mode_bus_mu", "mode_bus_sigma",
+  #                              "bus_automated_yes_mu", "bus_automated_yes_sigma" ,
+  #                              "bus_attendant_yes_mu", "bus_attendant_yes_sigma",
+  #                              "mode_RH_mu", "mode_RH_sigma",
+  #                              "RH_automated_yes_mu", "RH_automated_yes_sigma",
+  #                              "RH_attendant_yes_mu" , "RH_attendant_yes_sigma",
+  #                               "mode_sharedRH_mu" , "mode_sharedRH_sigma"  ,
+  #                              "sharedRH_automated_yes_mu" ,"sharedRH_automated_yes_sigma",
+  #                              "sharedRH_attendant_yes_mu",  "sharedRH_attendant_yes_sigma"),
+  #   coefficients = recode_factor(coefficients,
+  #                         "lambda" = "Lambda",
+  #                        "mode_bus_mu" = "Bus",
+  #                         "mode_RH_mu" = "Ride-hailing",
+  #                        "mode_sharedRH_mu" = "Shared ride-hailing",
+  #                       "bus_automated_yes_mu" = "Automated bus",
+  #                       "bus_attendant_yes_mu" = "Attendant present for bus",
+  #                       "RH_automated_yes_mu" = "Automated ride-hailing",
+  #                       "RH_attendant_yes_mu" = "Attendant present for ride-hailing",
+  #                      "sharedRH_automated_yes_mu" = "Automated shared ride-hailing",
+  #                      "sharedRH_attendant_yes_mu" = "Attendant present for shared ride-hailing")
+  #   ) %>%
+  # arrange(coefficients)
+
+
+
+summary_final <- results_mxl %>%
+  full_join(results_mxl_M, by = "coefficients") %>%
+  full_join(results_mxl_F, by = "coefficients") %>%
+  mutate(
+    coefficients = as.factor(coefficients),
+    # coefficients = recode_factor(coefficients,
+    #                       "lambda" = "Lambda",
+    #                      "mode_bus" = "Bus",
+    #                       "mode_RH" = "Ride-hailing",
+    #                      "mode_sharedRH" = "Shared ride-hailing",
+    #                     "bus_automated_yes" = "Automated bus",
+    #                     "bus_attendant_yes" = "Attendant present for bus",
+    #                     "RH_automated_yes" = "Automated ride-hailing",
+    #                     "RH_attendant_yes" = "Attendant present for ride-hailing",
+    #                    "sharedRH_automated_yes" = "Automated shared ride-hailing",
+    #                    "sharedRH_attendant_yes" = "Attendant present for shared ride-hailing"),
+    coefficients = coefficients %>% fct_relevel("lambda",
+                               "travelTime", "travelTime_sigma" ,
+                               "mode_bus", "mode_bus_sigma",
+                               "bus_automated_yes", "bus_automated_yes_sigma" ,
+                               "bus_attendant_yes", "bus_attendant_yes_sigma",
+                               "mode_RH", "mode_RH_sigma",
+                               "RH_automated_yes", "RH_automated_yes_sigma",
+                               "RH_attendant_yes" , "RH_attendant_yes_sigma",
+                                "mode_sharedRH" , "mode_sharedRH_sigma"  ,
+                               "sharedRH_automated_yes" ,"sharedRH_automated_yes_sigma",
+                               "sharedRH_attendant_yes",  "sharedRH_attendant_yes_sigma"),
+
+    ) %>%
+  arrange(coefficients)
+
+names(summary_final) <- c("coefficient", "MXL", "MXL_male", "MXL_female")
+
+# summary_final <- summary_final %>%
+#   select(-coefOrder) %>%
+#   mutate(
+#     MNL = ifelse(is.na(MNL), "-", MNL),
+#     MXL = ifelse(is.na(MXL), "-", MXL),
+#     MNL_female = ifelse(is.na(MNL_female), "-", MNL_female),
+#     MNL_male = ifelse(is.na(MNL_male), "-", MNL_male)
+#   )
+
+#FLEXTABLE
+summary1 <- flextable(as.data.frame(summary_final))
+theme_vanilla(summary1)
+#rename header rows based on models
+# summary1 <- add_header_row(
+#   summary1, values = c("", "MNL", "MXL", "MNL_Female", "MNL_Male")
+#   # ,
+#   # colwidths = c(1,2,2,2,2,2)
+#   )
+summary1<- autofit(summary1)
+summary1 <- add_footer_lines(summary1, values = "Signif. codes:  '***' = 0.001, '**' = 0.01, '*' = 0.05, '.' = 0.1, ' ' = 1")
+summary1 <- align(summary1, align = "right", part = "body")
+#print(summary1, preview = "docx")
+
+save_as_docx(
+  "Coef_Table" = summary1,
+  path = here::here('Coefficient_Table.docx'))
+
+# table1 <- kable(summary1, align = "r", escape = FALSE) %>%
+#    kable_styling() %>%
+#    add_footnote("Signif. codes:  '***' = 0.001, '**' = 0.01, '*' = 0.05, '.' = 0.1, ' ' = 1", notation="number")
+# 
+# table1
+
+
+
+```
+
+```{r modelPerformanceSummaries}
+
+
+modelResults_mxl <- round(summary(mxl_wtp)$statTable, 1)
+modelResults_mnl <- round(summary(mnl_dummy_WTP)$statTable, 1)
+modelResults_mnl_M <- round(summary(mnl_wtp_A)$statTable, 1)
+modelResults_mnl_F <- round(summary(mnl_wtp_B)$statTable, 1)
+
+
+modelResults_mxl$par <- row.names(modelResults_mxl)
+modelResults_mnl$par <- row.names(modelResults_mnl)
+modelResults_mnl_M$par <- row.names(modelResults_mnl_M)
+modelResults_mnl_F$par <- row.names(modelResults_mnl_F)
+
+modelResults_full <- modelResults_mxl %>%
+  left_join(modelResults_mnl, by = "par") %>%
+  left_join(modelResults_mnl_M, by = "par") %>%
+  left_join(modelResults_mnl_F, by = "par") %>%
+  select("par", ".x", ".y", ".x.x", ".y.y")
+
+names(modelResults_full) <- c("Attribute", "MXL", "MNL", "MNL_Male", "MNL_Female")
+
+
+summary2 <- flextable(as.data.frame(modelResults_full))
+
+theme_vanilla(summary2)
+summary1 <- align(summary1, align = "right", part = "body")
+
+print(summary2, preview = "docx")
+
+
+```
+

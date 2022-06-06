@@ -196,11 +196,12 @@ plot_mode_automated_attendant <- df_mode %>%
   theme_bw() +
   geom_hline(yintercept = 0, linetype = "dashed") +
   theme(
-    text = element_text(size=14, family = "Fira Sans", face = "bold"),
+    text = element_text(size=13, family = "Fira Sans", face = "bold"),
     strip.text.y = element_text(angle = 0),
     axis.title.y = element_blank(),
     axis.title.x = element_text(size = 12),
-    legend.title=element_blank()
+    legend.title=element_blank(),
+    legend.position="none"
   ) +
   scale_color_manual(
     values = plotColors) 
