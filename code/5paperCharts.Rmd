@@ -50,6 +50,7 @@ data_filtered <- read_csv(here::here('data_processed', 'data_filtered.csv'))
 
 load(here::here("models", "mxl.RData")) # Load models
 load(here::here("models", "mxl_gender.RData")) # Load gender models
+load(here::here("models", "mnl_gender.RData"))
 
 ```
 
@@ -236,7 +237,7 @@ results_mxl <- make_coef_table(mxl_wtp) %>%
                         "bus_attendant_yes_mu" = "bus_attendant_yes",
                          "RH_automated_yes_mu" = "RH_automated_yes",
                         "RH_attendant_yes_mu" = "RH_attendant_yes",
-                        "sharedRH_automated_yes_mu" = "sharedRH_automated_yes",
+                        "sharedRH_automated_yes_mu" =         "sharedRH_automated_yes",
                         "sharedRH_attendant_yes_mu" = "sharedRH_attendant_yes")
   )
 

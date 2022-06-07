@@ -136,9 +136,31 @@ gc()
 
 ## Models by gender ----------------------
 
-# Split data into groups
+# Split data into groups. Re-create obsID and respondent IDs. 
 data_A <- data %>% filter(genderGroup == "A") # male
+data_A$obsID = rep(seq(nrow(data_A) / 4), each = 4)
+
+id <-  sort(unique(data_A$id))
+
+temp <- data.frame(id = id, newID = seq(1:length(id)))
+
+data_A <- data_A %>% 
+  left_join(temp, by = "id") %>% 
+  select(-id) %>% 
+  rename(id = newID)
+
+
 data_B <- data %>% filter(genderGroup == "B") # female, transgender, non-binary
+data_B$obsID = rep(seq(nrow(data_B) / 4), each = 4)
+
+id <-  sort(unique(data_B$id))
+
+temp <- data.frame(id = id, newID = seq(1:length(id)))
+
+data_B <- data_B %>% 
+  left_join(temp, by = "id") %>% 
+  select(-id) %>% 
+  rename(id = newID)
 
 # Estimate separate models for each group in WTP space
 
@@ -198,6 +220,7 @@ mxl_wtp_B <- logitr(
   numCores   = numCores,
   numMultiStarts = numMultiStarts
 )
+
 # View summary of results
 summary(mxl_wtp_A) # Male
 summary(mxl_wtp_B) # Female/Trans
