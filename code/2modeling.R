@@ -164,19 +164,6 @@ data_B <- data_B %>%
 
 # Estimate separate models for each group in WTP space
 
-# mnl_wtp_A <- logitr(
-#   data       = data_A,
-#   outcome    = "choice",
-#   obsID      = "obsID",
-#   clusterID  = "id",
-#   modelSpace = "wtp",
-#   price      = "price",
-#   pars       = pars_wtp,
-#   numCores   = numCores,
-#   numMultiStarts = numMultiStarts
-# )
-
-
 mxl_wtp_A <- logitr(
   data       = data_A,
   outcome    = "choice",
@@ -191,19 +178,6 @@ mxl_wtp_A <- logitr(
   numCores   = numCores,
   numMultiStarts = numMultiStarts
 )
-
-
-# mnl_wtp_B <- logitr(
-#   data       = data_B,
-#   outcome    = "choice",
-#   obsID      = "obsID",
-#   clusterID  = "id",
-#   modelSpace = "wtp",
-#   price      = "price",
-#   pars       = pars_wtp,
-#   numCores   = numCores,
-#   numMultiStarts = numMultiStarts
-# )
 
 
 mxl_wtp_B <- logitr(

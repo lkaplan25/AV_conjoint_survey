@@ -227,98 +227,44 @@ make_coef_table <- function(model) {
 
 ```{r modelResults}
 # Make coefficient tables
-results_mxl <- make_coef_table(mxl_wtp) %>%
-  mutate(coefficients = recode_factor(coefficients,
-                           "travelTime_mu" = "travelTime",
-                        "mode_bus_mu" = "mode_bus",
-                          "mode_RH_mu" = "mode_RH",
-                         "mode_sharedRH_mu" = "mode_sharedRH" ,
-                         "bus_automated_yes_mu" = "bus_automated_yes",
-                        "bus_attendant_yes_mu" = "bus_attendant_yes",
-                         "RH_automated_yes_mu" = "RH_automated_yes",
-                        "RH_attendant_yes_mu" = "RH_attendant_yes",
-                        "sharedRH_automated_yes_mu" =         "sharedRH_automated_yes",
-                        "sharedRH_attendant_yes_mu" = "sharedRH_attendant_yes")
-  )
-
+results_mxl <- make_coef_table(mxl_wtp)
 results_mxl_M <- make_coef_table(mxl_wtp_A)
 results_mxl_F <- make_coef_table(mxl_wtp_B)
 
 #join
-#summary_final <- results_MNL %>%
-  # full_join(results_MXL, by = "coefficients") %>%
-  # full_join(results_mnl_M, by = "coefficients") %>%
-  # full_join(results_mnl_F, by = "coefficients")  %>%
-  # mutate(
-  #   coefficients = as.factor(coefficients),
-  #   coefficients = coefficients %>% fct_relevel("lambda",
-  #                              "travelTime_mu", "travelTime_sigma" ,
-  #                              "mode_bus_mu", "mode_bus_sigma",
-  #                              "bus_automated_yes_mu", "bus_automated_yes_sigma" ,
-  #                              "bus_attendant_yes_mu", "bus_attendant_yes_sigma",
-  #                              "mode_RH_mu", "mode_RH_sigma",
-  #                              "RH_automated_yes_mu", "RH_automated_yes_sigma",
-  #                              "RH_attendant_yes_mu" , "RH_attendant_yes_sigma",
-  #                               "mode_sharedRH_mu" , "mode_sharedRH_sigma"  ,
-  #                              "sharedRH_automated_yes_mu" ,"sharedRH_automated_yes_sigma",
-  #                              "sharedRH_attendant_yes_mu",  "sharedRH_attendant_yes_sigma"),
-  #   coefficients = recode_factor(coefficients,
-  #                         "lambda" = "Lambda",
-  #                        "mode_bus_mu" = "Bus",
-  #                         "mode_RH_mu" = "Ride-hailing",
-  #                        "mode_sharedRH_mu" = "Shared ride-hailing",
-  #                       "bus_automated_yes_mu" = "Automated bus",
-  #                       "bus_attendant_yes_mu" = "Attendant present for bus",
-  #                       "RH_automated_yes_mu" = "Automated ride-hailing",
-  #                       "RH_attendant_yes_mu" = "Attendant present for ride-hailing",
-  #                      "sharedRH_automated_yes_mu" = "Automated shared ride-hailing",
-  #                      "sharedRH_attendant_yes_mu" = "Attendant present for shared ride-hailing")
-  #   ) %>%
-  # arrange(coefficients)
-
-
-
 summary_final <- results_mxl %>%
   full_join(results_mxl_M, by = "coefficients") %>%
-  full_join(results_mxl_F, by = "coefficients") %>%
+  full_join(results_mxl_F, by = "coefficients")  %>%
   mutate(
     coefficients = as.factor(coefficients),
-    # coefficients = recode_factor(coefficients,
-    #                       "lambda" = "Lambda",
-    #                      "mode_bus" = "Bus",
-    #                       "mode_RH" = "Ride-hailing",
-    #                      "mode_sharedRH" = "Shared ride-hailing",
-    #                     "bus_automated_yes" = "Automated bus",
-    #                     "bus_attendant_yes" = "Attendant present for bus",
-    #                     "RH_automated_yes" = "Automated ride-hailing",
-    #                     "RH_attendant_yes" = "Attendant present for ride-hailing",
-    #                    "sharedRH_automated_yes" = "Automated shared ride-hailing",
-    #                    "sharedRH_attendant_yes" = "Attendant present for shared ride-hailing"),
     coefficients = coefficients %>% fct_relevel("lambda",
-                               "travelTime", "travelTime_sigma" ,
-                               "mode_bus", "mode_bus_sigma",
-                               "bus_automated_yes", "bus_automated_yes_sigma" ,
-                               "bus_attendant_yes", "bus_attendant_yes_sigma",
-                               "mode_RH", "mode_RH_sigma",
-                               "RH_automated_yes", "RH_automated_yes_sigma",
-                               "RH_attendant_yes" , "RH_attendant_yes_sigma",
-                                "mode_sharedRH" , "mode_sharedRH_sigma"  ,
-                               "sharedRH_automated_yes" ,"sharedRH_automated_yes_sigma",
-                               "sharedRH_attendant_yes",  "sharedRH_attendant_yes_sigma"),
-
+                             "travelTime_mu", "travelTime_sigma" ,
+                             "mode_bus_mu", "mode_bus_sigma",
+                             "bus_automated_yes_mu",   "bus_automated_yes_sigma" ,
+                             "bus_attendant_yes_mu", "bus_attendant_yes_sigma",
+                             "mode_RH_mu", "mode_RH_sigma",
+                             "RH_automated_yes_mu", "RH_automated_yes_sigma",
+                             "RH_attendant_yes_mu" , "RH_attendant_yes_sigma",
+                              "mode_sharedRH_mu" , "mode_sharedRH_sigma"  ,
+                             "sharedRH_automated_yes_mu" ,"sharedRH_automated_yes_sigma",
+                             "sharedRH_attendant_yes_mu",  "sharedRH_attendant_yes_sigma"),
+    coefficients = recode_factor(coefficients,
+                       "lambda" = "Lambda",
+                       "travelTime_mu" = "Travel time",
+                      "mode_bus_mu" = "Bus",
+                       "mode_RH_mu" = "Ride-hailing (RH)",
+                      "mode_sharedRH_mu" = "Shared RH",
+                     "bus_automated_yes_mu" = "Bus - Automated",
+                     "bus_attendant_yes_mu" = "Bus - Attendant present",
+                     "RH_automated_yes_mu" = "RH - Automated",
+                     "RH_attendant_yes_mu" = "RH - Attendant present",
+                    "sharedRH_automated_yes_mu" = "Shared RH - Automated",
+                    "sharedRH_attendant_yes_mu" = "Shared RH - Attendant present")
     ) %>%
   arrange(coefficients)
 
 names(summary_final) <- c("coefficient", "MXL", "MXL_male", "MXL_female")
 
-# summary_final <- summary_final %>%
-#   select(-coefOrder) %>%
-#   mutate(
-#     MNL = ifelse(is.na(MNL), "-", MNL),
-#     MXL = ifelse(is.na(MXL), "-", MXL),
-#     MNL_female = ifelse(is.na(MNL_female), "-", MNL_female),
-#     MNL_male = ifelse(is.na(MNL_male), "-", MNL_male)
-#   )
 
 #FLEXTABLE
 summary1 <- flextable(as.data.frame(summary_final))
@@ -332,7 +278,7 @@ theme_vanilla(summary1)
 summary1<- autofit(summary1)
 summary1 <- add_footer_lines(summary1, values = "Signif. codes:  '***' = 0.001, '**' = 0.01, '*' = 0.05, '.' = 0.1, ' ' = 1")
 summary1 <- align(summary1, align = "right", part = "body")
-#print(summary1, preview = "docx")
+print(summary1, preview = "docx")
 
 save_as_docx(
   "Coef_Table" = summary1,
@@ -352,24 +298,22 @@ save_as_docx(
 
 
 modelResults_mxl <- round(summary(mxl_wtp)$statTable, 1)
-modelResults_mnl <- round(summary(mnl_dummy_WTP)$statTable, 1)
-modelResults_mnl_M <- round(summary(mnl_wtp_A)$statTable, 1)
-modelResults_mnl_F <- round(summary(mnl_wtp_B)$statTable, 1)
-
+modelResults_mxl_M <- round(summary(mxl_wtp_A)$statTable, 1)
+modelResults_mxl_F <- round(summary(mxl_wtp_B)$statTable, 1)
 
 modelResults_mxl$par <- row.names(modelResults_mxl)
-modelResults_mnl$par <- row.names(modelResults_mnl)
-modelResults_mnl_M$par <- row.names(modelResults_mnl_M)
-modelResults_mnl_F$par <- row.names(modelResults_mnl_F)
+modelResults_mxl_M$par <- row.names(modelResults_mxl_M)
+modelResults_mxl_F$par <- row.names(modelResults_mxl_F)
 
 modelResults_full <- modelResults_mxl %>%
-  left_join(modelResults_mnl, by = "par") %>%
-  left_join(modelResults_mnl_M, by = "par") %>%
-  left_join(modelResults_mnl_F, by = "par") %>%
-  select("par", ".x", ".y", ".x.x", ".y.y")
+  left_join(modelResults_mxl_M, by = "par") %>%
+  left_join(modelResults_mxl_F, by = "par") 
 
-names(modelResults_full) <- c("Attribute", "MXL", "MNL", "MNL_Male", "MNL_Female")
 
+names(modelResults_full) <- c("MXL", "Attribute", "MXL_Male", "MXL_Female")
+
+modelResults_full <- modelResults_full %>% 
+  select("Attribute", "MXL", "MXL_Male", "MXL_Female")
 
 summary2 <- flextable(as.data.frame(modelResults_full))
 

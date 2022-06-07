@@ -211,7 +211,7 @@ plot_mode_automated_attendant
 # Save plot 
 
 ggsave(
-  filename = here('figs', 'mxl_wtp_gender.png'), 
+  filename = here::here('figs', 'mxl_wtp_gender.png'), 
   plot = plot_mode_automated_attendant, 
   width = 7, height = 2.75
 )
