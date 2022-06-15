@@ -340,7 +340,7 @@ bump_chart1 <- sens_price %>%
   geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) +
   theme_minimal_hgrid(font_size = 10) +
   theme(legend.position = "none",
-        axis.text.x=element_blank(),
+        #axis.text.x=element_blank(),
         text = element_text(family = "Fira Sans")
   ) +
   labs(
@@ -354,6 +354,11 @@ bump_chart1 <- sens_price %>%
 
 bump_chart1
 
+ggsave(
+  filename = here('figs', 'proRailScenario.png'), 
+  plot = bump_chart1, 
+  width = 7, height = 4
+)
 
 ## Scenario 2
 bump_chart2 <- sens_price %>% 
@@ -451,7 +456,7 @@ bump_chart5 <- sens_price %>%
   geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) + #changed from last.points
   theme_minimal_hgrid(font_size = 10) +
   theme(legend.position = "none",
-        axis.text.x=element_blank(),
+        #axis.text.x=element_blank(),
         text = element_text(family = "Fira Sans")) +
   labs(
     title = "Long Trip Scenario",
@@ -462,6 +467,12 @@ bump_chart5 <- sens_price %>%
   scale_x_discrete(expand = expansion(add = c(.5, 1)))
 
 bump_chart5
+
+ggsave(
+  filename = here('figs', 'longTripScenario.png'), 
+  plot = bump_chart5, 
+  width = 7, height = 4
+)
 
 ## Scenario 6
 
@@ -488,6 +499,12 @@ bump_chart6 <- sens_price %>%
   scale_x_discrete(expand = expansion(add = c(.5, 1)))
 
 bump_chart6
+
+ggsave(
+  filename = here('figs', 'badTransitOptionsScenario.png'), 
+  plot = bump_chart6, 
+  width = 7, height = 4
+)
 
 
 scenarioPlotAll <- plot_grid(
