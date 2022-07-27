@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
   comment = "#>",
-  fig.path = "figs/", # Folder where rendered plots are saved
+  #fig.path = "figs/", # Folder where rendered plots are saved
   fig.width = 7.252, # Default plot width
   fig.height = 4, # Default plot height
   fig.retina = 3 # For better plot resolution
@@ -30,9 +30,8 @@ knitr::opts_chunk$set(
 source(here::here('code', '0setup.R'))
 
 # Load models
-load(here::here("models", "mnl.RData"))
 load(here::here("models", "mxl.RData"))
-load(here::here("models", "mnl_gender.RData"))
+load(here::here("models", "mxl_gender.RData"))
 
 plotColors <- c('sienna','#e2a8a6' , 'grey60','lightsteelblue', 'steelblue')
 base <- 7
@@ -453,6 +452,9 @@ make_coef_table <- function(model) {
 ```{r weightedModelResults, echo=FALSE}
 
 # Make coefficient tables
+results_mxl <- make_coef_table(mxl_wtp)
+results_mxl_weighted <- make_coef_table(mxl_wtp)
+
 results_mxl <- make_coef_table(mxl_wtp) %>%
   mutate(coefficients = recode_factor(coefficients,
                            "travelTime_mu" = "travelTime",
