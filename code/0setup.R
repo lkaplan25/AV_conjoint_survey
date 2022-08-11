@@ -1,3 +1,5 @@
+#TEST
+
 # Install packages
 # install.packages(c(
 #     'here', 'tidyverse', 'lubridate', 'data.table', 'logitr', 'fastDummies',
