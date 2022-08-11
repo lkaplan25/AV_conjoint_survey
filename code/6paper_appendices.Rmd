@@ -455,88 +455,73 @@ make_coef_table <- function(model) {
 results_mxl <- make_coef_table(mxl_wtp)
 results_mxl_weighted <- make_coef_table(mxl_wtp)
 
-results_mxl <- make_coef_table(mxl_wtp) %>%
-  mutate(coefficients = recode_factor(coefficients,
-                           "travelTime_mu" = "travelTime",
-                        "mode_bus_mu" = "mode_bus",
-                          "mode_RH_mu" = "mode_RH",
-                         "mode_sharedRH_mu" = "mode_sharedRH" ,
-                         "bus_automated_yes_mu" = "bus_automated_yes",
-                        "bus_attendant_yes_mu" = "bus_attendant_yes",
-                         "RH_automated_yes_mu" = "RH_automated_yes",
-                        "RH_attendant_yes_mu" = "RH_attendant_yes",
-                        "sharedRH_automated_yes_mu" = "sharedRH_automated_yes",
-                        "sharedRH_attendant_yes_mu" = "sharedRH_attendant_yes")
-  )
-
-results_mxl_weighted <- make_coef_table(mxl_wtp_weighted) %>%
-  mutate(coefficients = recode_factor(coefficients,
-                           "travelTime_mu" = "travelTime",
-                        "mode_bus_mu" = "mode_bus",
-                          "mode_RH_mu" = "mode_RH",
-                         "mode_sharedRH_mu" = "mode_sharedRH" ,
-                         "bus_automated_yes_mu" = "bus_automated_yes",
-                        "bus_attendant_yes_mu" = "bus_attendant_yes",
-                         "RH_automated_yes_mu" = "RH_automated_yes",
-                        "RH_attendant_yes_mu" = "RH_attendant_yes",
-                        "sharedRH_automated_yes_mu" = "sharedRH_automated_yes",
-                        "sharedRH_attendant_yes_mu" = "sharedRH_attendant_yes")
-  )
-
-results_mnl <- make_coef_table(mnl_wtp)
-results_mnl_weighted <- make_coef_table(mnl_wtp_weighted)
-
+#join
 summary_final <- results_mxl %>%
   full_join(results_mxl_weighted, by = "coefficients") %>%
-  full_join(results_mnl, by = "coefficients") %>%
-  full_join(results_mnl_weighted, by = "coefficients") %>%
   mutate(
     coefficients = as.factor(coefficients),
     coefficients = coefficients %>% fct_relevel("lambda",
-                               "travelTime", "travelTime_sigma" ,
-                               "mode_bus", "mode_bus_sigma",
-                               "bus_automated_yes", "bus_automated_yes_sigma" ,
-                               "bus_attendant_yes", "bus_attendant_yes_sigma",
-                               "mode_RH", "mode_RH_sigma",
-                               "RH_automated_yes", "RH_automated_yes_sigma",
-                               "RH_attendant_yes" , "RH_attendant_yes_sigma",
-                                "mode_sharedRH" , "mode_sharedRH_sigma"  ,
-                               "sharedRH_automated_yes" ,"sharedRH_automated_yes_sigma",
-                               "sharedRH_attendant_yes",  "sharedRH_attendant_yes_sigma"),
-
+                             "travelTime_mu", "travelTime_sigma" ,
+                             "mode_bus_mu", "mode_bus_sigma",
+                             "bus_automated_yes_mu",   "bus_automated_yes_sigma" ,
+                             "bus_attendant_yes_mu", "bus_attendant_yes_sigma",
+                             "mode_RH_mu", "mode_RH_sigma",
+                             "RH_automated_yes_mu", "RH_automated_yes_sigma",
+                             "RH_attendant_yes_mu" , "RH_attendant_yes_sigma",
+                              "mode_sharedRH_mu" , "mode_sharedRH_sigma"  ,
+                             "sharedRH_automated_yes_mu" ,"sharedRH_automated_yes_sigma",
+                             "sharedRH_attendant_yes_mu",  "sharedRH_attendant_yes_sigma"),
+    coefficients = recode_factor(coefficients,
+                       "lambda" = "Lambda",
+                       "travelTime_mu" = "Travel time",
+                      "mode_bus_mu" = "Bus",
+                       "mode_RH_mu" = "Ride-hailing (RH)",
+                      "mode_sharedRH_mu" = "Shared RH",
+                     "bus_automated_yes_mu" = "Bus - Automated",
+                     "bus_attendant_yes_mu" = "Bus - Attendant present",
+                     "RH_automated_yes_mu" = "RH - Automated",
+                     "RH_attendant_yes_mu" = "RH - Attendant present",
+                    "sharedRH_automated_yes_mu" = "Shared RH - Automated",
+                    "sharedRH_attendant_yes_mu" = "Shared RH - Attendant present")
     ) %>%
   arrange(coefficients)
 
-names(summary_final) <- c("coefficient", "MXL", "MXL Weighted", "MNL", "MNL Weighted")
+names(summary_final) <- c("coefficient", "MXL", "MXL_weighted")
+
 
 
 #FLEXTABLE
 summary1 <- flextable(as.data.frame(summary_final))
 theme_vanilla(summary1)
+#rename header rows based on models
+# summary1 <- add_header_row(
+#   summary1, values = c("", "MNL", "MXL", "MNL_Female", "MNL_Male")
+#   # ,
+#   # colwidths = c(1,2,2,2,2,2)
+#   )
 summary1<- autofit(summary1)
 summary1 <- add_footer_lines(summary1, values = "Signif. codes:  '***' = 0.001, '**' = 0.01, '*' = 0.05, '.' = 0.1, ' ' = 1")
 summary1 <- align(summary1, align = "right", part = "body")
-#print(summary1, preview = "docx")
+print(summary1, preview = "docx")
+
+save_as_docx(
+  "Coef_Table" = summary1,
+  path = here::here('Coefficient_Table_AppendixB.docx'))
+
 ```
 
 ```{r modelResults_v2}
 modelResults_mxl <- round(summary(mxl_wtp)$statTable, 1)
 modelResults_mxl_weighted <- round(summary(mxl_wtp_weighted)$statTable, 1)
-modelResults_mnl <- round(summary(mnl_wtp)$statTable, 1)
-modelResults_mnl_weighted <- round(summary(mnl_wtp_weighted)$statTable, 1)
 
 modelResults_mxl$par <- row.names(modelResults_mxl)
 modelResults_mxl_weighted$par <- row.names(modelResults_mxl_weighted)
-modelResults_mnl$par <- row.names(modelResults_mnl)
-modelResults_mnl_weighted$par <- row.names(modelResults_mnl_weighted)
 
 modelResults_full <- modelResults_mxl %>%
   left_join(modelResults_mxl_weighted, by = "par") %>%
-  left_join(modelResults_mnl, by = "par") %>%
-  left_join(modelResults_mnl_weighted, by = "par") %>%
-  select("par", ".x", ".y", ".x.x", ".y.y")
+  select("par", ".x", ".y")
 
-names(modelResults_full) <- c("Attribute", "MXL", "MXL weighted", "MNL", "MNL_Weighted")
+names(modelResults_full) <- c("Attribute", "MXL", "MXL weighted")
 
 summary2 <- flextable(as.data.frame(modelResults_full))
 
