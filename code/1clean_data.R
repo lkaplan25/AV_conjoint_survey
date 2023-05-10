@@ -235,9 +235,10 @@ data_filtered <- data_filtered %>%
       gender %in% c("female", "transMale", "transFemale", "genderNonconform") ~ "B",
       TRUE ~ "unknown"),
     incomeGroup = case_when(
-      income %in% c("under10", "inc_10to15", "inc_15to25", "inc_25to35", "inc_35to50") ~ "B",
+      # The region defines low-income households as less than $49,999 per year (2017/2018 Regional Travel Survey)
+      income %in% c("under10", "inc_10to15", "inc_15to25", "inc_25to35", "inc_35to50") ~ "B", 
       (income == "prefer_not_say" | is.na(income)) ~ "unknown",
-      TRUE ~ "A") #high income
+      TRUE ~ "A") #mid/high income
   ) 
 
 write_csv(data_filtered, here::here('data_processed', 'data_filtered.csv'))
@@ -256,7 +257,7 @@ data_filtered <- read_csv(here::here('data_processed', 'data_filtered.csv')) %>%
 # Remove participants who are missing demographic info
 
 data_filtered <- data_filtered %>%
-  filter(genderGroup != "unknown")
+  filter(genderGroup != "unknown", incomeGroup != "unknown") # TESTING INCOME
 
 
 dim(data_filtered)
@@ -264,7 +265,7 @@ dim(data_filtered)
 # Merge responses with survey designs to get choiceData 
 
 choiceData <- data_filtered %>%  
-  select(respondentID, cbc1:cbc8, genderGroup, id) %>% 
+  select(respondentID, cbc1:cbc8, genderGroup, incomeGroup, id) %>% 
   mutate(
     weights = ifelse(genderGroup == "B", 1.15, .75) # added in weights for gender
   ) %>% 
@@ -301,7 +302,7 @@ choiceData <- choiceData %>%
   rename(id = newID)
 
 # Save formatted response data
-write_csv(choiceData, here::here('data_processed', 'choiceData.csv'))
+write_csv(choiceData, here::here('data_processed', 'choiceData_Income.csv'))
 
 
 

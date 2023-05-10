@@ -23,7 +23,8 @@ source(here::here('code', '0setup.R'))
 
 # Read in choice data--------------
 
-choiceData <- read_csv(here::here('data_processed', 'choiceData.csv'))
+choiceData <- read_csv(here::here('data_processed', 'choiceData_Income.csv')) # TESTING INCOME
+
 
 # -----------------------------------------------------------------------------
 # Estimate models where all covariates are dummy coded
@@ -210,7 +211,89 @@ eigen(mxl_wtp_B$hessian)$values
 
 # Save model objects 
 
+#save(
+#  mxl_wtp_A, mxl_wtp_B,
+#  file = here("models", "mxl_gender.RData") 
+#)
+
+## Models by income----------------------------------------------------------------
+
+
+# Split data into groups. Re-create obsID and respondent IDs. 
+data_A <- data %>% filter(incomeGroup == "A") # mid/high income
+data_A$obsID = rep(seq(nrow(data_A) / 4), each = 4)
+
+id <-  sort(unique(data_A$id))
+
+temp <- data.frame(id = id, newID = seq(1:length(id)))
+
+data_A <- data_A %>% 
+  left_join(temp, by = "id") %>% 
+  select(-id) %>% 
+  rename(id = newID)
+
+
+data_B <- data %>% filter(incomeGroup == "B") # low-income households
+data_B$obsID = rep(seq(nrow(data_B) / 4), each = 4)
+
+id <-  sort(unique(data_B$id))
+
+temp <- data.frame(id = id, newID = seq(1:length(id)))
+
+data_B <- data_B %>% 
+  left_join(temp, by = "id") %>% 
+  select(-id) %>% 
+  rename(id = newID)
+
+# Estimate separate models for each group in WTP space
+
+mxl_wtp_A <- logitr(
+  data       = data_A,
+  outcome    = "choice",
+  obsID      = "obsID",
+  panelID    = "id",
+  clusterID  = "id",
+  numDraws   = numDraws,
+  modelSpace = "wtp",
+  scalePar   = "price",
+  pars       = pars_wtp,
+  randPars   = randPars,
+  numCores   = numCores,
+  numMultiStarts = 1 # testing with one multistart at first
+)
+
+
+mxl_wtp_B <- logitr(
+  data       = data_B,
+  outcome    = "choice",
+  obsID      = "obsID",
+  panelID    = "id",
+  clusterID  = "id",
+  numDraws   = numDraws,
+  modelSpace = "wtp",
+  scalePar   = "price",
+  pars       = pars_wtp,
+  randPars   = randPars,
+  numCores   = numCores,
+  numMultiStarts = 1 # testing with one multistart at first
+)
+
+# View summary of results
+summary(mxl_wtp_A) # Mid/High Income Household
+summary(mxl_wtp_B) # Low Income Household
+
+# Check the 1st order condition: Is the gradient at the solution zero?
+mxl_wtp_A$gradient
+mxl_wtp_B$gradient
+
+# 2nd order condition: Is the hessian negative definite?
+# (If all the eigenvalues are negative, the hessian is negative definite)
+eigen(mxl_wtp_A$hessian)$values
+eigen(mxl_wtp_B$hessian)$values
+
+# Save model objects 
+
 save(
   mxl_wtp_A, mxl_wtp_B,
-  file = here("models", "mxl_gender.RData") 
+  file = here("models", "mxl_income.RData") 
 )

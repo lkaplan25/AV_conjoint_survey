@@ -2,8 +2,10 @@
 source(here::here('code', '0setup.R'))
 
 # Load models
-load(here::here("models", "mxl.RData"))
+#load(here::here("models", "mxl.RData"))
+load(here::here("models", "mxl_v2.RData"))
 load(here::here("models", "mxl_gender.RData"))
+load(here::here("models", "mxl_income.RData"))
 
 # Visualize results of estimated mixed logit WTP space model
 
@@ -12,7 +14,7 @@ load(here::here("models", "mxl_gender.RData"))
 
 # Estimate WTP in WTP space model:
 coefs <- coef(mxl_wtp)
-covariance <- vcov(mxl_wtp) 
+covariance <- vcov(mxl_wtp) # FIX--------------------------------------------------------
 wtp_draws <- as.data.frame(mvrnorm(10^4, coefs, covariance))
 
 # Computing the combinations of WTP draws
@@ -89,11 +91,11 @@ plot_mode_automated_attendant_All <- df_mode %>%
 plot_mode_automated_attendant_All
 
 
-ggsave(
-  filename = here('figs', 'wtp_mode.png'), 
-  plot = plot_mode_automated_attendant_All, 
-  width = 7, height = 2.75
-)
+# ggsave(
+#   filename = here('figs', 'wtp_mode.png'), 
+#   plot = plot_mode_automated_attendant_All, 
+#   width = 7, height = 2.75
+# )
 
 
 ## Subgroup analysis-------------
