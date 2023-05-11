@@ -14,23 +14,24 @@ load(here::here("models", "mxl_income.RData"))
 
 # Estimate WTP in WTP space model:
 coefs <- coef(mxl_wtp)
-covariance <- vcov(mxl_wtp)
+covariance <- vcov(mxl_wtp) 
 wtp_draws <- as.data.frame(mvrnorm(10^4, coefs, covariance))
 
 # Computing the combinations of WTP draws
 wtp_draws <- wtp_draws %>% 
   mutate(
-    wtp_bus_autoYes = mode_bus_mu + bus_automated_yes_mu,
-    wtp_bus_autoYes_attendantYes = mode_bus_mu + bus_automated_yes_mu + bus_attendant_yes_mu,
-    wtp_RH_autoYes = mode_RH_mu + RH_automated_yes_mu,
-    wtp_RH_autoYes_attendantYes = mode_RH_mu + RH_automated_yes_mu + RH_attendant_yes_mu,
-    wtp_sharedRH_autoYes = mode_sharedRH_mu + sharedRH_automated_yes_mu,
-    wtp_sharedRH_autoYes_attendantYes = mode_sharedRH_mu + sharedRH_automated_yes_mu + sharedRH_attendant_yes_mu
+    wtp_bus_autoYes = mode_bus + bus_automated_yes,
+    wtp_bus_autoYes_attendantYes = mode_bus + bus_automated_yes + bus_attendant_yes,
+    wtp_RH_autoYes = mode_RH + RH_automated_yes,
+    wtp_RH_autoYes_attendantYes = mode_RH + RH_automated_yes + RH_attendant_yes,
+    wtp_sharedRH_autoYes = mode_sharedRH + sharedRH_automated_yes,
+    wtp_sharedRH_autoYes_attendantYes = mode_sharedRH + sharedRH_automated_yes + sharedRH_attendant_yes
   )
 
 wtp_ci2 <- ci(wtp_draws)
 wtp_ci2 <- wtp_ci2[-1,] # Drop lambda (we won't plot this)
 wtp_ci2
+
 
 # -----------------------------------------------------------------------------
 # Plot results
@@ -123,7 +124,7 @@ coef_draws_A <- coef_draws_A %>%
     wtp_sharedRH_autoYes_attendantYes = mode_sharedRH + sharedRH_automated_yes + sharedRH_attendant_yes
   )
 
-wtp_ci_A <- ci(coef_draws_A, ci = 0.95)
+wtp_ci_A <- ci(coef_draws_A)
 wtp_ci_A <- wtp_ci_A[-1,] %>% # Drop lambda (we won't plot this)
   mutate(
     #group = "Male"
@@ -169,11 +170,11 @@ wtp_mode <- wtp_groups %>% filter(par %in% c('mode_bus', 'wtp_bus_autoYes', 'wtp
 
 df_mode <- wtp_mode %>% 
   mutate(mode = case_when(
-    par %in% c('mode_bus', 'mode_RH', 'mode_sharedRH') ~ "Not\nAutomated",
+    par %in% c('mode_bus_mu', 'mode_RH_mu', 'mode_sharedRH_mu') ~ "Not\nAutomated",
     par %in% c('wtp_bus_autoYes', 'wtp_RH_autoYes','wtp_sharedRH_autoYes') ~ "Automated,\nNo Attendant\nPresent",
     par %in% c('wtp_bus_autoYes_attendantYes', 'wtp_RH_autoYes_attendantYes','wtp_sharedRH_autoYes_attendantYes') ~ "Automated,\nAttendant\nPresent"
   ),
-  par = recode_factor(wtp_mode$par, "mode_bus" = "Bus", "mode_RH" = "Ride-hailing", "mode_sharedRH" = "Shared Ride-hailing",
+  par = recode_factor(wtp_mode$par, "mode_bus_mu" = "Bus", "mode_RH_mu" = "Ride-hailing", "mode_sharedRH_mu" = "Shared Ride-hailing",
                       'wtp_bus_autoYes' = "Bus", 'wtp_RH_autoYes' = "Ride-hailing",'wtp_sharedRH_autoYes' = "Shared Ride-hailing",
                       'wtp_bus_autoYes_attendantYes' = "Bus", 'wtp_RH_autoYes_attendantYes' = "Ride-hailing",'wtp_sharedRH_autoYes_attendantYes' = "Shared Ride-hailing")
   )
@@ -206,7 +207,7 @@ plot_mode_automated_attendant <- df_mode %>%
     axis.title.y = element_blank(),
     axis.title.x = element_text(size = 12),
     legend.title=element_blank(),
-    #legend.position="none"
+    legend.position="none"
   ) +
   scale_color_manual(
     values = plotColors) 
@@ -216,11 +217,11 @@ plot_mode_automated_attendant
 # Save plot 
 
 # ggsave(
-#   filename = here::here('figs', 'mxl_wtp_income.png'),
-#   plot = plot_mode_automated_attendant,
+#   filename = here::here('figs', 'mxl_wtp_gender.png'), 
+#   plot = plot_mode_automated_attendant, 
 #   width = 7, height = 2.75
 # )
-
+# 
 
 
 # Scenario analyses ----------------------------------
@@ -241,8 +242,8 @@ n <- length(price_reduction)  # Number of simulations
 
 scenarios <- rep_df(df, n)
 
-# test <- scenarios %>% 
-#   filter(mode == "RH")
+test <- scenarios %>% 
+  filter(mode == "RH")
 
 price_reduction <- rep(price_reduction, 18) #adjust based on number of scenarios or price levels
 
@@ -280,8 +281,7 @@ scenarios <- dummy_cols(scenarios, c('mode', 'automated', 'attendant')) %>%
 
 scenarios$obsID <- rep(seq(nrow(scenarios)/4), each = 4) # Reset obsIDs
 
-
-### Full model -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # For each case, simulate the market share predictions
 
 sens_price <- predict(
@@ -290,14 +290,12 @@ sens_price <- predict(
   obsID = 'obsID', 
   ci = 0.95,
   returnData = TRUE,
-  scalePar = "price"
-) 
-
-# %>% 
-#   mutate(
-#     price = as.double(price),
-#     percent_red = 1 - price_reduction
-#   )
+  price = "price"
+) %>% 
+  mutate(
+    price = as.double(price),
+    percent_red = 1 - price_reduction
+  )
 
 head(sens_price)
 
@@ -327,51 +325,7 @@ sens_price <- sens_price %>%
     )
   )
 
-### Low-income model -----------------------------------------------------------------------------
-# For each case, simulate the market share predictions
 
-sens_price <- predict(
-  mnl_wtp_B,
-  newdata = scenarios, 
-  obsID = 'obsID', 
-  ci = 0.95,
-  returnData = TRUE,
-  scalePar = "price"
-)
-
-# %>% 
-#   mutate(
-#     scalePar = as.double(price),
-#     percent_red = 1 - price_reduction
-#   )
-
-head(sens_price)
-
-plot_red <- rep(rep(seq(0, .3, by = 0.05), each = 4), 18)
-
-sens_price$percent_red <- plot_red
-
-sens_price <- sens_price %>% 
-  mutate(
-    scenario_type = case_when(
-      (percent_red == 0.3) ~ paste0(scenario_type, "Discount"),
-      TRUE ~ scenario_type
-    ),
-    label = case_when(
-      scenario_type == "baseline" ~ "Status Quo",
-      scenario_type == "baselineDiscount" ~ "REMOVE",
-      scenario_type == "auto" ~  "Automated",
-      scenario_type == "autoDiscount" ~ "Automated,\n30% discount",
-      scenario_type == "autoAttendant" ~ "Automated,\nattendant\npresent",
-      scenario_type == "autoAttendantDiscount" ~ "Automated,\nattendant present,\n30% discount"
-    ),
-    mode = case_when(
-      mode == "RH" ~ "Ride-hailing",
-      mode == "rail" ~ "Rail",
-      mode == "sharedRH" ~ "Shared\nRide-hailing",
-      mode == "bus" ~ "Bus"
-    )
-  )
 
 
 #--------------------------

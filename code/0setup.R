@@ -4,8 +4,8 @@
 #     'directlabels', 'cowplot', 'ggbump', 'ggrepel', 'janitor', 'likert',
 #     'gtsummary', 'knitr', 'flextable', 'remotes', 'logitr'
 # ))
-# remotes::install_github('jhelvy/cbcTools')
-# remotes::install_github('emse-madd-gwu/maddTools')
+install.packages("cbcTools")
+remotes::install_github("jhelvy/maddTools")
 
 # Data cleaning
 library(here)
