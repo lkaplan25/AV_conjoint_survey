@@ -93,7 +93,7 @@ survey <- survey %>%
   ) %>% 
   select(-imgEnd)
 
-# Note: removed the code to save the survey. Survey included in the repo is the exact survey that was used in the research study. 
+# Note: removed the code to save the survey. Survey included in the data_raw folder in the repo is the exact survey that was used in the research study. 
 
 
 # Power analysis ---------------------------------------------------------------
