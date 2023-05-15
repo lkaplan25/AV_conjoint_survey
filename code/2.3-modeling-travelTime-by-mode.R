@@ -1,5 +1,6 @@
-# Estimate mixed logit (mxl) models for Gender Subgroups
+# Estimate mixed logit (mxl) models
 # NOTE: The mxl models take a while (over an hour each) to run. We recommend running the code overnight.
+# This file includes models in which travel time is estimated for each mode type. 
 
 # Load libraries and settings
 source(here::here('code', '0setup.R'))
@@ -22,9 +23,10 @@ options(dplyr.width = Inf)
 # "travelTime"   = Travel time in minutes
 
 
-# Read in choice data file that has missing gender values removed--------------
+# Read in choice data--------------
 
-choiceData <- read_csv(here::here('data_processed', 'choiceData_gender.csv'))
+choiceData <- read_csv(here::here('data_processed', 'choiceData_gender.csv')) 
+
 
 # Estimate models where all covariates are dummy coded
 
@@ -57,7 +59,7 @@ data$obsID = rep(seq(nrow(data) / 4), each = 4)
 # Setup some common objects
 
 numDraws <- 300
-numMultiStarts <- 30 
+numMultiStarts <- 1 
 numCores <- 7
 
 pars_pref <- c(
@@ -84,84 +86,59 @@ randPars = c(
   mode_sharedRH = 'n', sharedRH_automated_yes = 'n', sharedRH_attendant_yes = 'n'
 )
 
-## Models by gender ----------------------
+# ----------------------------------------------------------------------
+#  Preference Space Model
 
-# Split data into groups. Re-create obsID and respondent IDs. 
-data_A <- data %>% filter(genderGroup == "A") # male
-data_A$obsID = rep(seq(nrow(data_A) / 4), each = 4)
+mxl_pref <- logitr(
+  data      = data,
+  outcome   = "choice",
+  obsID     = "obsID",
+  panelID   = "id",
+  clusterID = "id",
+  numDraws  = numDraws,
+  pars      = pars_pref,
+  randPars  = randPars,
+  numCores  = numCores,
+  numMultiStarts = numMultiStarts
+)
 
-id <-  sort(unique(data_A$id))
-
-temp <- data.frame(id = id, newID = seq(1:length(id)))
-
-data_A <- data_A %>% 
-  left_join(temp, by = "id") %>% 
-  select(-id) %>% 
-  rename(id = newID)
-
-
-data_B <- data %>% filter(genderGroup == "B") # female, transgender, non-binary
-data_B$obsID = rep(seq(nrow(data_B) / 4), each = 4)
-
-id <-  sort(unique(data_B$id))
-
-temp <- data.frame(id = id, newID = seq(1:length(id)))
-
-data_B <- data_B %>% 
-  left_join(temp, by = "id") %>% 
-  select(-id) %>% 
-  rename(id = newID)
-
-#------------------------------------------------------------------------
-## Estimate separate models for each group in WTP space
-
-mxl_wtp_gender_A <- logitr(
-  data       = data_A,
+# WTP Space Model
+mxl_wtp <- logitr(
+  data       = data,
   outcome    = "choice",
   obsID      = "obsID",
   panelID    = "id",
   clusterID  = "id",
   numDraws   = numDraws,
-  modelSpace = "wtp",
-  price      = "price",
+  scalePar   = "price",
   pars       = pars_wtp,
   randPars   = randPars,
   numCores   = numCores,
   numMultiStarts = numMultiStarts
 )
 
-
-mxl_wtp_gender_B <- logitr(
-  data       = data_B,
+# WTP Space Model with Weights for gender
+mxl_wtp_weighted <- logitr(
+  data       = data,
   outcome    = "choice",
   obsID      = "obsID",
   panelID    = "id",
   clusterID  = "id",
   numDraws   = numDraws,
-  modelSpace = "wtp",
-  price      = "price",
+  scalePar   = "price",
   pars       = pars_wtp,
   randPars   = randPars,
+  weights    = "weights",
   numCores   = numCores,
   numMultiStarts = numMultiStarts
 )
 
-# View summary of results
-summary(mxl_wtp_gender_A) # Male
-summary(mxl_wtp_gender_B) # Female/Trans
-
-# Check the 1st order condition: Is the gradient at the solution zero?
-mxl_wtp_gender_A$gradient
-mxl_wtp_gender_B$gradient
-
-# 2nd order condition: Is the hessian negative definite?
-# (If all the eigenvalues are negative, the hessian is negative definite)
-eigen(mxl_wtp_gender_A$hessian)$values
-eigen(mxl_wtp_gender_B$hessian)$values
-
-# Save model objects 
-
+# Save
 save(
- mxl_wtp_gender_A, mxl_wtp_gender_B,
- file = here("models", "mxl_gender.RData")
+  mxl_pref, mxl_wtp, 
+  mxl_wtp_weighted, 
+  file = here::here("models", "mxl_v2.RData") 
 )
+rm(mxl_pref, mxl_wtp, mxl_wtp_weighted)
+gc()
+

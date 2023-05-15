@@ -10,9 +10,10 @@ knitr::opts_chunk$set(echo = TRUE)
 source(here::here('code', '0setup.R'))
 
 # Load models
-load(here::here("models", "mnl.RData")) 
 load(here::here("models", "mxl.RData")) 
-load(here::here("models", "mnl_gender.RData"))
+load(here::here("models", "mxl_gender.RData"))
+load(here::here("models", "mxl_income.RData"))
+load(here::here("models", "mxl_v2.RData"))
 
 # Function for printing summary & gradient
 print_summary <- function(x) {
@@ -21,25 +22,6 @@ print_summary <- function(x) {
 }
 ```
 
-# Multinomial logit models (MNL)
-
-## MNL Preference
-
-```{r mnl_pref}
-print_summary(mnl_pref)
-```
-
-## MNL WTP
-
-```{r mnl_wtp, echo=FALSE}
-print_summary(mnl_wtp)
-```
-
-## MNL WTP Weighted
-
-```{r mnl_wtp_weighted}
-print_summary(mnl_wtp_weighted)
-```
 
 # Mixed logit models (MXL)
 
@@ -61,16 +43,31 @@ print_summary(mxl_wtp)
 print_summary(mxl_wtp_weighted)
 ```
 
-# MNL models by gender
+# MXL models by gender
 
 ## Male 
 
-```{r mnl_wtp_A}
-print_summary(mnl_wtp_A)
+```{r mxl_wtp_gender_A}
+print_summary(mxl_wtp_gender_A)
 ```
 
 ## Female, transgender, non-binary
 
-```{r mnl_wtp_B}
-print_summary(mnl_wtp_B)
+```{r mxl_wtp_gender_B}
+print_summary(mxl_wtp_gender_B)
 ```
+
+# MXL models by income
+
+## Mid/High Income 
+
+```{r mxl_wtp_income_A}
+print_summary(mxl_wtp_income_A)
+```
+
+## Low Income
+
+```{r mxl_wtp_income_B}
+print_summary(mxl_wtp_income_B)
+```
+

@@ -1,5 +1,6 @@
-# Estimate mixed logit (mxl) models for Gender Subgroups
+# Estimate mixed logit (mxl) models for Income Subgroups
 # NOTE: The mxl models take a while (over an hour each) to run. We recommend running the code overnight.
+
 
 # Load libraries and settings
 source(here::here('code', '0setup.R'))
@@ -22,9 +23,9 @@ options(dplyr.width = Inf)
 # "travelTime"   = Travel time in minutes
 
 
-# Read in choice data file that has missing gender values removed--------------
+# Read in choice data file that has both missing gender and missing income values removed--------------
 
-choiceData <- read_csv(here::here('data_processed', 'choiceData_gender.csv'))
+choiceData <- read_csv(here::here('data_processed', 'choiceData_income.csv'))
 
 # Estimate models where all covariates are dummy coded
 
@@ -58,7 +59,7 @@ data$obsID = rep(seq(nrow(data) / 4), each = 4)
 
 numDraws <- 300
 numMultiStarts <- 30 
-numCores <- 7
+numCores <- 1
 
 pars_pref <- c(
   "price", "travelTime",
@@ -84,10 +85,11 @@ randPars = c(
   mode_sharedRH = 'n', sharedRH_automated_yes = 'n', sharedRH_attendant_yes = 'n'
 )
 
-## Models by gender ----------------------
+## Models by income----------------------------------------------------------------
+
 
 # Split data into groups. Re-create obsID and respondent IDs. 
-data_A <- data %>% filter(genderGroup == "A") # male
+data_A <- data %>% filter(incomeGroup == "A") # mid/high income
 data_A$obsID = rep(seq(nrow(data_A) / 4), each = 4)
 
 id <-  sort(unique(data_A$id))
@@ -100,7 +102,7 @@ data_A <- data_A %>%
   rename(id = newID)
 
 
-data_B <- data %>% filter(genderGroup == "B") # female, transgender, non-binary
+data_B <- data %>% filter(incomeGroup == "B") # low-income households
 data_B$obsID = rep(seq(nrow(data_B) / 4), each = 4)
 
 id <-  sort(unique(data_B$id))
@@ -112,10 +114,9 @@ data_B <- data_B %>%
   select(-id) %>% 
   rename(id = newID)
 
-#------------------------------------------------------------------------
-## Estimate separate models for each group in WTP space
+# Estimate separate models for each group in WTP space
 
-mxl_wtp_gender_A <- logitr(
+mxl_wtp_income_A <- logitr(
   data       = data_A,
   outcome    = "choice",
   obsID      = "obsID",
@@ -123,15 +124,15 @@ mxl_wtp_gender_A <- logitr(
   clusterID  = "id",
   numDraws   = numDraws,
   modelSpace = "wtp",
-  price      = "price",
+  scalePar   = "price",
   pars       = pars_wtp,
   randPars   = randPars,
   numCores   = numCores,
-  numMultiStarts = numMultiStarts
+  numMultiStarts = numMultiStarts 
 )
 
 
-mxl_wtp_gender_B <- logitr(
+mxl_wtp_income_B <- logitr(
   data       = data_B,
   outcome    = "choice",
   obsID      = "obsID",
@@ -139,7 +140,7 @@ mxl_wtp_gender_B <- logitr(
   clusterID  = "id",
   numDraws   = numDraws,
   modelSpace = "wtp",
-  price      = "price",
+  scalePar   = "price",
   pars       = pars_wtp,
   randPars   = randPars,
   numCores   = numCores,
@@ -147,21 +148,21 @@ mxl_wtp_gender_B <- logitr(
 )
 
 # View summary of results
-summary(mxl_wtp_gender_A) # Male
-summary(mxl_wtp_gender_B) # Female/Trans
+summary(mxl_wtp_income_A) # Mid/High Income Household
+summary(mxl_wtp_income_B) # Low Income Household
 
 # Check the 1st order condition: Is the gradient at the solution zero?
-mxl_wtp_gender_A$gradient
-mxl_wtp_gender_B$gradient
+mxl_wtp_income_A$gradient
+mxl_wtp_income_B$gradient
 
 # 2nd order condition: Is the hessian negative definite?
 # (If all the eigenvalues are negative, the hessian is negative definite)
-eigen(mxl_wtp_gender_A$hessian)$values
-eigen(mxl_wtp_gender_B$hessian)$values
+eigen(mxl_wtp_income_A$hessian)$values
+eigen(mxl_wtp_income_B$hessian)$values
 
 # Save model objects 
 
 save(
- mxl_wtp_gender_A, mxl_wtp_gender_B,
- file = here("models", "mxl_gender.RData")
+  mxl_wtp_income_A, mxl_wtp_income_B,
+  file = here("models", "mxl_income.RData") 
 )
