@@ -6,54 +6,49 @@ source(here::here('code', '0setup.R'))
 # The file also includes code to perform a power analysis, which guided our
 # target sample size for the survey.
 
+# Create the survey----------------------------------------------------------------
 # Define the attributes and levels
-levels <- list(
-    mode = c("sharedRH", "RH", "bus", "rail"),
-    # Mode-specific levels
-    travelTime_sharedRH = c(0.8, 0.9, 1, 1.1, 1.2), # will later multiply by RH travelTime
-    travelTime_RH = c(15, 20, 25, 30, 35),
-    travelTime_bus = c(20, 25, 30, 35, 40),
-    travelTime_rail = c(15, 20, 25, 30, 35),
-    price_sharedRH = c(0.5, 0.7, 0.8), # will later multiply by RH price
-    price_RH = c(5, 7, 10, 12, 15),
-    price_bus = c(1, 2, 3, 4, 5),
-    price_rail = c(2, 3, 4, 5, 6),
-    # All other levels
-    automated = c(0, 1),
-    attendant = c(0, 1)) 
+profiles <- cbc_profiles(
+    mode                = c("sharedRH", "RH", "bus", "rail"),
+    # Mode-specific attributes
+    travelTime_sharedRH = c(0.8, 0.9, 1, 1.1, 1.2), # Time (min), for sharedRH will later multiply by RH travelTime
+    travelTime_RH       = c(15, 20, 25, 30, 35),
+    travelTime_bus      = c(20, 25, 30, 35, 40),
+    travelTime_rail     = c(15, 20, 25, 30, 35),
+    price_sharedRH      = c(0.5, 0.7, 0.8), # Price ($), will later multiply by RH price
+    price_RH            = c(5, 7, 10, 12, 15),
+    price_bus           = c(1, 2, 3, 4, 5),
+    price_rail          = c(2, 3, 4, 5, 6),
+    # All other attributes
+    automated           = c(0, 1),
+    attendant           = c(0, 1)) 
 
-# Make a full-factorial design of experiment
-doe <- makeDoe(levels)
-
-# Re-code levels
-doe <- recodeDesign(doe, levels) # Note: this function has now been replaced in the new cbcTools package
-
-
-# Make the survey
-survey <- makeSurvey(
-  doe = doe,
-  nResp = 5000,
-  nAltsPerQ = 4,
-  nQPerResp = 8,
-  group = "mode") %>% 
+# Make a survey based on a full-factorial design of experiment
+survey <- cbc_design(
+  profiles = profiles,
+  n_resp = 5000, # Number of respondents
+  n_alts = 4, # Number of alternatives per question
+  n_q    = 8, # Number of questions per respondent
+  label = "mode" # Attributes are mode-specific
+  ) %>% 
   # Recode price and travelTime variables
   mutate(
     price = case_when(
-      mode == "sharedRH" ~ price_sharedRH,
-      mode == "RH" ~ price_RH, 
-      mode == "bus" ~ price_bus, 
-      mode == "rail" ~ price_rail),
+       mode == "sharedRH" ~ price_sharedRH,
+       mode == "RH" ~ price_RH, 
+       mode == "bus" ~ price_bus, 
+       mode == "rail" ~ price_rail),
     travelTime = case_when(
-      mode == "sharedRH" ~ travelTime_sharedRH, 
-      mode == "RH" ~ travelTime_RH, 
-      mode == "bus" ~ travelTime_bus, 
-      mode == "rail" ~ travelTime_rail)) %>% 
-  select(-starts_with("price_"), -starts_with("travelTime_")) %>% 
-  mutate(
-    # Rail should never be automated 
-    automated = ifelse(mode == "rail", 0, automated),
-    # If not automated, attendant should be 0 
-    attendant = ifelse(automated == 0, 0, attendant))
+       mode == "sharedRH" ~ travelTime_sharedRH, 
+       mode == "RH" ~ travelTime_RH, 
+       mode == "bus" ~ travelTime_bus, 
+       mode == "rail" ~ travelTime_rail)) %>% 
+    select(-starts_with("price_"), -starts_with("travelTime_")) %>% 
+    mutate(
+      # Rail should never be automated 
+      automated = ifelse(mode == "rail", 0, automated),
+      # If not automated, attendant should be 0 
+      attendant = ifelse(automated == 0, 0, attendant))
 
 # Fix sharedRH prices
 price <- survey %>% 
@@ -70,7 +65,6 @@ survey <- survey %>%
   )
 
 # Fix sharedRH travelTime
-
 time <- survey %>% 
   select(obsID, mode, travelTime) %>% 
   spread(mode, travelTime) %>% 
@@ -86,10 +80,8 @@ survey <- survey %>%
   )
 
 
-
 # Add image path for automated/attendant
-
-imgBeg <- "'https://raw.githubusercontent.com/lkaplan25/AV_conjoint_survey/main/attendant_"
+imgBeg <- "'https://raw.githubusercontent.com/lkaplan25/AV_conjoint_survey_2022/main/survey_images/attendant_"
 
 survey <- survey %>% 
   mutate(
@@ -104,7 +96,7 @@ survey <- survey %>%
 # Note: removed the code to save the survey. Survey included in the repo is the exact survey that was used in the research study. 
 
 
-# Power analysis ------------------
+# Power analysis ---------------------------------------------------------------
 
 survey_dummy <- dummy_cols(survey, c('mode', 'automated', 'attendant')) %>% 
     select(-mode_rail) %>% 
@@ -124,26 +116,25 @@ survey_dummy <- dummy_cols(survey, c('mode', 'automated', 'attendant')) %>%
         price = as.double(price)
     ) 
 
-# Simulating random choices
-data <- simulateChoices(
-    survey = survey_dummy,
+# Simulating random choices 
+data <- cbc_choices(
+    design = survey_dummy,
     obsID = "obsID"
 )
 
+# Estimate the same model on different size subsets of data
 
-models <- estimateModels(
+power <- cbc_power(
     nbreaks = 10,
     data = data,
     pars   = c("mode_bus", "mode_RH", "mode_sharedRH", "bus_automated_yes", "bus_attendant_yes", 
                "RH_automated_yes", "RH_attendant_yes", "sharedRH_automated_yes", "sharedRH_attendant_yes", "price", "travelTime"),
     outcome = "choice",
-    obsID = "obsID"
+    obsID = "obsID", 
+    n_q = 8
 )
 
-results <- getModelResults(models)
-
-
-powerAnalysisPlot <- ggplot(results) +
+powerAnalysisPlot <- ggplot(power) +
     geom_hline(yintercept = 0.05, color = "red", linetype = 2) +
     geom_point(aes(x = sampleSize, y = se, color = coef), size = 2) +
     expand_limits(y = 0) +

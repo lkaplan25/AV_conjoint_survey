@@ -2,10 +2,9 @@
 # install.packages(c(
 #     'here', 'tidyverse', 'lubridate', 'data.table', 'logitr', 'fastDummies',
 #     'directlabels', 'cowplot', 'ggbump', 'ggrepel', 'janitor', 'likert',
-#     'gtsummary', 'knitr', 'flextable', 'remotes', 'logitr'
+#     'gtsummary', 'knitr', 'flextable', 'remotes', 'logitr', 'cbcTools'
 # ))
-install.packages("cbcTools")
-remotes::install_github("jhelvy/maddTools")
+#remotes::install_github("jhelvy/maddTools")
 
 # Data cleaning
 library(here)
