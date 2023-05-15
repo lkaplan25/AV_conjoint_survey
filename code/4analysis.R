@@ -2,9 +2,9 @@
 source(here::here('code', '0setup.R'))
 
 # Load models
-#load(here::here("models", "mxl.RData"))
-#load(here::here("models", "mxl_v2.RData"))
-#load(here::here("models", "mxl_gender.RData"))
+load(here::here("models", "mxl.RData"))
+load(here::here("models", "mxl_v2.RData"))
+load(here::here("models", "mxl_gender.RData"))
 load(here::here("models", "mxl_income.RData"))
 
 # Visualize results of estimated mixed logit WTP space model

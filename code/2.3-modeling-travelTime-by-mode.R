@@ -137,7 +137,7 @@ mxl_wtp_weighted <- logitr(
 save(
   mxl_pref, mxl_wtp, 
   mxl_wtp_weighted, 
-  file = here::here("models", "mxl_v2.RData") 
+  file = here::here("models", "mxl_travelTime_by_mode.RData") 
 )
 rm(mxl_pref, mxl_wtp, mxl_wtp_weighted)
 gc()
