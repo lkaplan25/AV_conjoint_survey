@@ -59,7 +59,7 @@ data$obsID = rep(seq(nrow(data) / 4), each = 4)
 # Setup some common objects
 
 numDraws <- 300
-numMultiStarts <- 1 
+numMultiStarts <- 30
 numCores <- 7
 
 pars_pref <- c(
