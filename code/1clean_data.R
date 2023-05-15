@@ -233,7 +233,9 @@ write_csv(data_filtered, here::here('data_processed', 'data_filtered.csv'))
 
 
 
-# Creating df of choices---------------
+# Creating dfs of choices---------------
+
+# Choice set with just missing gender info removed------------------------------------------
 
 # Load the survey data set:
 
@@ -242,11 +244,10 @@ data_filtered <- read_csv(here::here('data_processed', 'data_filtered.csv')) %>%
   select(session, respondentID, id, cbc1, cbc2, cbc3, cbc4, cbc5, cbc6, cbc7, cbc8, everything())
 
 
-# Remove participants who are missing gender and income info (used for group-based models)
+# Remove participants who are missing gender info 
 
 data_filtered <- data_filtered %>%
-  filter(genderGroup != "unknown", incomeGroup != "unknown") # TESTING INCOME
-
+  filter(genderGroup != "unknown") 
 
 dim(data_filtered)
 
@@ -282,8 +283,59 @@ choiceData <- choiceData %>%
   rename(id = newID)
 
 # Save formatted response data
-write_csv(choiceData, here::here('data_processed', 'choiceData_Income.csv'))
+write_csv(choiceData, here::here('data_processed', 'choiceData_gender.csv'))
 
 
+# Creating dfs of choices---------------
+
+# Choice set with missing gender AND missing income info removed------------------------------------------
+
+# Load the survey data set:
+
+survey <- read_csv(here::here('data_raw', 'survey.csv'))
+data_filtered <- read_csv(here::here('data_processed', 'data_filtered.csv')) %>% 
+  select(session, respondentID, id, cbc1, cbc2, cbc3, cbc4, cbc5, cbc6, cbc7, cbc8, everything())
+
+
+# Remove participants who are missing gender info 
+
+data_filtered <- data_filtered %>%
+  filter(genderGroup != "unknown", incomeGroup != "unknown") 
+
+dim(data_filtered)
+
+# Merge responses with survey designs to get choiceData 
+
+choiceData <- data_filtered %>%  
+  select(respondentID, cbc1:cbc8, genderGroup, incomeGroup, id) %>% 
+  mutate(
+    weights = ifelse(genderGroup == "B", 1.15, .75) # added in weights for gender
+  ) %>% 
+  gather(
+    key = "qID",
+    value = "selection",
+    cbc1:cbc8
+  ) %>% 
+  mutate(
+    qID = str_replace(qID, "cbc", ""),
+    qID = as.numeric(qID),
+    respondentID = as.numeric(respondentID)
+  ) %>%
+  left_join(survey, by = c("respondentID" = "respID", "qID")) %>%
+  mutate(
+    choice = ifelse(selection == altID, 1, 0)
+  )
+
+id <-  sort(unique(choiceData$id))
+
+temp <- data.frame(id = id, newID = seq(1:length(id)))
+
+choiceData <- choiceData %>% 
+  left_join(temp, by = "id") %>% 
+  select(-id) %>% 
+  rename(id = newID)
+
+# Save formatted response data
+write_csv(choiceData, here::here('data_processed', 'choiceData_income.csv'))
 
 
