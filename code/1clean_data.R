@@ -2,6 +2,10 @@
 source(here::here('code', '0setup.R'))
 
 # Download raw data-----------
+# These files were downloaded directly from the survey platform formR.
+# As a feature of the formR platform, the survey had to be divided into multiple parts which
+# resulted in multiple files containing the survey responses.
+
 raw_data_start_path <- read_csv(here("data_raw", "AV_formr_conjoint_start_v3.csv"))
 raw_data_P1 <- read_csv(here("data_raw", "AV_formr_conjoint_P1_v3.csv"))
 raw_data_P2 <- read_csv(here("data_raw", "AV_formr_conjoint_P2_v3.csv"))
@@ -12,12 +16,12 @@ raw_data_P4 <- read_csv(here("data_raw", "AV_formr_conjoint_P4_v3.csv"))
 #Format start survey
 raw_data_start <- raw_data_start_path %>%
   filter(!is.na(ended)) %>% 
-  #calc time to do start survey
+  #calculate time to do start survey
   mutate(
-    start_created = ymd_hms(created),
-    start_ended =  ymd_hms(ended),
+    start_created = mdy_hms(created),
+    start_ended =  mdy_hms(ended),
     sec_elapsed_start = as.numeric(start_ended - start_created, units = "secs")) %>%
-  #select important col from start survey
+  #select important columns from start survey
   select(session, respondentID, psid, start_ended, sec_elapsed_start, everything()) %>% 
   filter(!is.na(sec_elapsed_start))
 
@@ -35,7 +39,6 @@ raw_data_StartP1 <- raw_data_start %>%
   select(session, start_ended, pageTime3, everything())
 
 # Join P1 and P2 data sets
-
 raw_data_P2 <- raw_data_P2 %>% 
   mutate(
     P2_created = ymd_hms(created),
@@ -44,13 +47,11 @@ raw_data_P2 <- raw_data_P2 %>%
   select(-respondentID) %>% 
   filter(!is.na(P2_ended))
 
-
 raw_data <- raw_data_StartP1 %>% 
   inner_join(raw_data_P2, by = c("session")) %>% 
   select(session, sec_elapsed_start, start_ended, P1_ended, P2_created, everything())
 
 # Add in P3 data
-
 raw_data_P3 <- raw_data_P3 %>% 
   mutate(
     P3_created = ymd_hms(created),
@@ -65,7 +66,6 @@ raw_data <- raw_data %>%
 
 
 # Add in P4 data
-
 raw_data_P4 <- raw_data_P4 %>% 
   mutate(
     P4_created = ymd_hms(created),
@@ -75,26 +75,14 @@ raw_data_P4 <- raw_data_P4 %>%
   ) %>% 
   filter(!is.na(P4_ended))
 
-
 raw_data <- raw_data %>% 
   inner_join(raw_data_P4, by = c("session")) %>% 
   select(session, psid, respondentID, sec_elapsed_start, everything())
 
-#check Dynata data
-
-check <- raw_data %>% 
-  select(psid, screenout, attentionScreenout, speedCheckScreenout, cbcSameScreenout, start_created, P4_ended)
-
-dynataList <- check %>% 
-  select(psid, P4_ended) %>% 
-  distinct(psid, P4_ended)
-
-write_csv(dynataList, here::here('data_processed', 'dynataList.csv')) 
-
 # Clean data-----------------
 
 data_clean <- raw_data %>%
-  #calc times for survey
+  #calculate times for survey
   mutate(
     pageTime3 = ymd_hms(pageTime3, tz = "EST"), # calculate time on video page
     pageTime4 = ymd_hms(pageTime4, tz = "EST"),
@@ -130,14 +118,14 @@ data_clean <- raw_data %>%
     avg_sec_cbcLastFour = as.numeric(((sec_cbc5 + sec_cbc6 + sec_cbc7 + sec_cbc8)/4), units = "secs")
   )
 
-data_clean$id = seq(nrow(data_clean)) #Check this
+data_clean$id = seq(nrow(data_clean)) 
 
 write_csv(data_clean, here::here('data_processed', 'data_clean.csv')) 
 
 
 data <- read_csv(here::here('data_processed', 'data_clean.csv'))
 
-# Filter out responses------------
+## Filter out responses------------
 
 #starting dimensions
 dim(data) 
@@ -235,10 +223,10 @@ data_filtered <- data_filtered %>%
       gender %in% c("female", "transMale", "transFemale", "genderNonconform") ~ "B",
       TRUE ~ "unknown"),
     incomeGroup = case_when(
-      # The region defines low-income households as less than $49,999 per year (2017/2018 Regional Travel Survey)
+      # The Washington, DC Region defines low-income households as less than $49,999 per year (2017/2018 Regional Travel Survey)
       income %in% c("under10", "inc_10to15", "inc_15to25", "inc_25to35", "inc_35to50") ~ "B", 
       (income == "prefer_not_say" | is.na(income)) ~ "unknown",
-      TRUE ~ "A") #mid/high income
+      TRUE ~ "A") #Mid/High income
   ) 
 
 write_csv(data_filtered, here::here('data_processed', 'data_filtered.csv'))
@@ -254,7 +242,7 @@ data_filtered <- read_csv(here::here('data_processed', 'data_filtered.csv')) %>%
   select(session, respondentID, id, cbc1, cbc2, cbc3, cbc4, cbc5, cbc6, cbc7, cbc8, everything())
 
 
-# Remove participants who are missing demographic info
+# Remove participants who are missing gender and income info (used for group-based models)
 
 data_filtered <- data_filtered %>%
   filter(genderGroup != "unknown", incomeGroup != "unknown") # TESTING INCOME
@@ -278,19 +266,11 @@ choiceData <- data_filtered %>%
     qID = str_replace(qID, "cbc", ""),
     qID = as.numeric(qID),
     respondentID = as.numeric(respondentID)
-  ) %>% 
-  left_join(survey, by = c("respondentID" = "respID", "qID")) %>% 
+  ) %>%
+  left_join(survey, by = c("respondentID" = "respID", "qID")) %>%
   mutate(
     choice = ifelse(selection == altID, 1, 0)
   )
-
-# %>% 
-#   select(-genderGroup)
-
-
-
-# Re-number obsID and respondentID
-#choiceData$obsID = rep(seq(nrow(choiceData) / 4), each = 4)
 
 id <-  sort(unique(choiceData$id))
 
