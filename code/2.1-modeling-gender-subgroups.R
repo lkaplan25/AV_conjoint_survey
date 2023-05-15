@@ -1,6 +1,5 @@
-# Estimate mixed logit (mxl) models
+# Estimate mixed logit (mxl) models for Gender Subgroups
 # NOTE: The mxl models take a while (over an hour each) to run. We recommend running the code overnight.
-# This file includes models in which travel time is estimated for each mode type. It also conducts a subgroup analysis on high vs. low income
 
 # Load libraries and settings
 source(here::here('code', '0setup.R'))
@@ -25,8 +24,7 @@ options(dplyr.width = Inf)
 
 # Read in choice data--------------
 
-choiceData <- read_csv(here::here('data_processed', 'choiceData_gender.csv')) 
-
+choiceData <- read_csv(here::here('data_processed', 'choiceData.csv'))
 
 # Estimate models where all covariates are dummy coded
 
@@ -59,7 +57,7 @@ data$obsID = rep(seq(nrow(data) / 4), each = 4)
 # Setup some common objects
 
 numDraws <- 300
-numMultiStarts <- 1 
+numMultiStarts <- 30 
 numCores <- 7
 
 pars_pref <- c(
@@ -86,69 +84,10 @@ randPars = c(
   mode_sharedRH = 'n', sharedRH_automated_yes = 'n', sharedRH_attendant_yes = 'n'
 )
 
-# ----------------------------------------------------------------------
-#  Preference Space Model
-
-mxl_pref <- logitr(
-  data      = data,
-  outcome   = "choice",
-  obsID     = "obsID",
-  panelID   = "id",
-  clusterID = "id",
-  numDraws  = numDraws,
-  pars      = pars_pref,
-  randPars  = randPars,
-  numCores  = numCores,
-  numMultiStarts = numMultiStarts
-)
-
-# WTP Space Model
-mxl_wtp <- logitr(
-  data       = data,
-  outcome    = "choice",
-  obsID      = "obsID",
-  panelID    = "id",
-  clusterID  = "id",
-  numDraws   = numDraws,
-  scalePar   = "price",
-  pars       = pars_wtp,
-  randPars   = randPars,
-  numCores   = numCores,
-  numMultiStarts = numMultiStarts
-)
-
-# WTP Space Model with Weights for gender
-mxl_wtp_weighted <- logitr(
-  data       = data,
-  outcome    = "choice",
-  obsID      = "obsID",
-  panelID    = "id",
-  clusterID  = "id",
-  numDraws   = numDraws,
-  scalePar   = "price",
-  pars       = pars_wtp,
-  randPars   = randPars,
-  weights    = "weights",
-  numCores   = numCores,
-  numMultiStarts = numMultiStarts
-)
-
-# Save
-save(
-  mxl_pref, mxl_wtp, 
-  mxl_wtp_weighted, 
-  file = here::here("models", "mxl_v2.RData") 
-)
-rm(mxl_pref, mxl_wtp, mxl_wtp_weighted)
-gc()
-
-# Subgroup analysis --------------------------
-
-## Income Subgroups----------------------------------------------------------------
-
+## Models by gender ----------------------
 
 # Split data into groups. Re-create obsID and respondent IDs. 
-data_A <- data %>% filter(incomeGroup == "A") # mid/high income
+data_A <- data %>% filter(genderGroup == "A") # male
 data_A$obsID = rep(seq(nrow(data_A) / 4), each = 4)
 
 id <-  sort(unique(data_A$id))
@@ -161,7 +100,7 @@ data_A <- data_A %>%
   rename(id = newID)
 
 
-data_B <- data %>% filter(incomeGroup == "B") # low-income households
+data_B <- data %>% filter(genderGroup == "B") # female, transgender, non-binary
 data_B$obsID = rep(seq(nrow(data_B) / 4), each = 4)
 
 id <-  sort(unique(data_B$id))
@@ -173,7 +112,8 @@ data_B <- data_B %>%
   select(-id) %>% 
   rename(id = newID)
 
-# Estimate separate models for each group in WTP space
+#------------------------------------------------------------------------
+## Estimate separate models for each group in WTP space
 
 mxl_wtp_A <- logitr(
   data       = data_A,
@@ -182,11 +122,12 @@ mxl_wtp_A <- logitr(
   panelID    = "id",
   clusterID  = "id",
   numDraws   = numDraws,
-  scalePar   = "price",
+  modelSpace = "wtp",
+  price      = "price",
   pars       = pars_wtp,
   randPars   = randPars,
   numCores   = numCores,
-  numMultiStarts = numMultiStarts 
+  numMultiStarts = numMultiStarts
 )
 
 
@@ -197,16 +138,17 @@ mxl_wtp_B <- logitr(
   panelID    = "id",
   clusterID  = "id",
   numDraws   = numDraws,
-  scalePar   = "price",
+  modelSpace = "wtp",
+  price      = "price",
   pars       = pars_wtp,
   randPars   = randPars,
   numCores   = numCores,
-  numMultiStarts = numMultiStarts 
+  numMultiStarts = numMultiStarts
 )
 
 # View summary of results
-summary(mxl_wtp_A) # Mid/High Income Household
-summary(mxl_wtp_B) # Low Income Household
+summary(mxl_wtp_A) # Male
+summary(mxl_wtp_B) # Female/Trans
 
 # Check the 1st order condition: Is the gradient at the solution zero?
 mxl_wtp_A$gradient
@@ -219,7 +161,7 @@ eigen(mxl_wtp_B$hessian)$values
 
 # Save model objects 
 
-save(
-  mxl_wtp_A, mxl_wtp_B,
-  file = here("models", "mxl_income.RData") 
-)
+#save(
+#  mxl_wtp_A, mxl_wtp_B,
+#  file = here("models", "mxl_gender.RData") 
+#)

@@ -1,6 +1,6 @@
-# Estimate mixed logit (mxl) models
+# Estimate mixed logit (mxl) models for Income Subgroups
 # NOTE: The mxl models take a while (over an hour each) to run. We recommend running the code overnight.
-# This file includes models in which travel time is estimated for each mode type. It also conducts a subgroup analysis on high vs. low income
+
 
 # Load libraries and settings
 source(here::here('code', '0setup.R'))
@@ -25,8 +25,7 @@ options(dplyr.width = Inf)
 
 # Read in choice data--------------
 
-choiceData <- read_csv(here::here('data_processed', 'choiceData_gender.csv')) 
-
+choiceData <- read_csv(here::here('data_processed', 'choiceData.csv'))
 
 # Estimate models where all covariates are dummy coded
 
@@ -59,8 +58,8 @@ data$obsID = rep(seq(nrow(data) / 4), each = 4)
 # Setup some common objects
 
 numDraws <- 300
-numMultiStarts <- 1 
-numCores <- 7
+numMultiStarts <- 30 
+numCores <- 1
 
 pars_pref <- c(
   "price", "travelTime",
@@ -86,65 +85,7 @@ randPars = c(
   mode_sharedRH = 'n', sharedRH_automated_yes = 'n', sharedRH_attendant_yes = 'n'
 )
 
-# ----------------------------------------------------------------------
-#  Preference Space Model
-
-mxl_pref <- logitr(
-  data      = data,
-  outcome   = "choice",
-  obsID     = "obsID",
-  panelID   = "id",
-  clusterID = "id",
-  numDraws  = numDraws,
-  pars      = pars_pref,
-  randPars  = randPars,
-  numCores  = numCores,
-  numMultiStarts = numMultiStarts
-)
-
-# WTP Space Model
-mxl_wtp <- logitr(
-  data       = data,
-  outcome    = "choice",
-  obsID      = "obsID",
-  panelID    = "id",
-  clusterID  = "id",
-  numDraws   = numDraws,
-  scalePar   = "price",
-  pars       = pars_wtp,
-  randPars   = randPars,
-  numCores   = numCores,
-  numMultiStarts = numMultiStarts
-)
-
-# WTP Space Model with Weights for gender
-mxl_wtp_weighted <- logitr(
-  data       = data,
-  outcome    = "choice",
-  obsID      = "obsID",
-  panelID    = "id",
-  clusterID  = "id",
-  numDraws   = numDraws,
-  scalePar   = "price",
-  pars       = pars_wtp,
-  randPars   = randPars,
-  weights    = "weights",
-  numCores   = numCores,
-  numMultiStarts = numMultiStarts
-)
-
-# Save
-save(
-  mxl_pref, mxl_wtp, 
-  mxl_wtp_weighted, 
-  file = here::here("models", "mxl_v2.RData") 
-)
-rm(mxl_pref, mxl_wtp, mxl_wtp_weighted)
-gc()
-
-# Subgroup analysis --------------------------
-
-## Income Subgroups----------------------------------------------------------------
+## Models by income----------------------------------------------------------------
 
 
 # Split data into groups. Re-create obsID and respondent IDs. 
@@ -182,6 +123,7 @@ mxl_wtp_A <- logitr(
   panelID    = "id",
   clusterID  = "id",
   numDraws   = numDraws,
+  modelSpace = "wtp",
   scalePar   = "price",
   pars       = pars_wtp,
   randPars   = randPars,
@@ -197,11 +139,12 @@ mxl_wtp_B <- logitr(
   panelID    = "id",
   clusterID  = "id",
   numDraws   = numDraws,
+  modelSpace = "wtp",
   scalePar   = "price",
   pars       = pars_wtp,
   randPars   = randPars,
   numCores   = numCores,
-  numMultiStarts = numMultiStarts 
+  numMultiStarts = numMultiStarts
 )
 
 # View summary of results
