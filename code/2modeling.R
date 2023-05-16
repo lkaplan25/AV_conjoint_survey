@@ -33,6 +33,9 @@ choiceData <- read_csv(here::here('data_processed', 'choiceData.csv'))
 data <- dummy_cols(choiceData, c('mode', 'automated', 'attendant')) %>%
   select(-mode_rail, -imgPath) %>% 
   mutate(
+    travelTime_bus         = mode_bus*travelTime,
+    travelTime_RH          = mode_RH*travelTime,
+    travelTime_sharedRH    = mode_sharedRH*travelTime,
     bus_automated_yes      = mode_bus*automated_Yes,
     bus_automated_no       = mode_bus*automated_No,
     bus_attendant_yes      = mode_bus*attendant_Yes,
@@ -51,46 +54,26 @@ data <- dummy_cols(choiceData, c('mode', 'automated', 'attendant')) %>%
 
 # Setup some common objects
 
-numDraws <- 300
-numMultiStarts <- 30 
-numCores <- 1
+numDraws <- 500
+numMultiStarts <- 30
+numCores <- 2
+drawType <- 'sobol'
 
-pars_pref <- c(
-  "price", "travelTime",
-  "mode_bus", "bus_automated_yes", "bus_attendant_yes",
-  "mode_RH", "RH_automated_yes", "RH_attendant_yes",
-  "mode_sharedRH", "sharedRH_automated_yes", "sharedRH_attendant_yes"
-)
-
-pars_wtp <- c(
+pars <- c(
   "travelTime",
+  "travelTime_bus", "travelTime_RH", "travelTime_sharedRH",
   "mode_bus", "bus_automated_yes", "bus_attendant_yes",
   "mode_RH", "RH_automated_yes", "RH_attendant_yes",
   "mode_sharedRH", "sharedRH_automated_yes", "sharedRH_attendant_yes"
 )
 
 randPars = c(
-  travelTime = 'n',
-  mode_bus = 'n', bus_automated_yes = 'n', bus_attendant_yes = 'n',
-  mode_RH = 'n', RH_automated_yes = 'n', RH_attendant_yes = 'n',
-  mode_sharedRH = 'n', sharedRH_automated_yes = 'n', sharedRH_attendant_yes = 'n'
+  mode_bus = 'n', # bus_automated_yes = 'n', bus_attendant_yes = 'n',
+  mode_RH = 'n', #RH_automated_yes = 'n', RH_attendant_yes = 'n',
+  mode_sharedRH = 'n' #sharedRH_automated_yes = 'n', sharedRH_attendant_yes = 'n'
 )
-
 
 # Mixed logit models ----------
-
-mxl_pref <- logitr(
-  data      = data,
-  outcome   = "choice",
-  obsID     = "obsID",
-  panelID   = "id",
-  clusterID = "id",
-  numDraws  = numDraws,
-  pars      = pars_pref,
-  randPars  = randPars,
-  numCores  = numCores,
-  numMultiStarts = numMultiStarts
-)
 
 mxl_wtp <- logitr(
   data       = data,
@@ -98,10 +81,11 @@ mxl_wtp <- logitr(
   obsID      = "obsID",
   panelID    = "id",
   clusterID  = "id",
-  numDraws   = numDraws,
-  scalePar   = "price",
   pars       = pars_wtp,
+  scalePar   = "price",
   randPars   = randPars,
+  numDraws   = numDraws,
+  drawType   = drawType,
   numCores   = numCores,
   numMultiStarts = numMultiStarts
 )
@@ -112,13 +96,14 @@ mxl_wtp_weighted <- logitr(
   obsID      = "obsID",
   panelID    = "id",
   clusterID  = "id",
-  numDraws   = numDraws,
-  scalePar   = "price",
   pars       = pars_wtp,
+  scalePar   = "price",
   randPars   = randPars,
-  weights    = "weights",
+  numDraws   = numDraws,
+  drawType   = drawType,
   numCores   = numCores,
   numMultiStarts = numMultiStarts
+  weights    = "weights"
 )
 
 # Save
