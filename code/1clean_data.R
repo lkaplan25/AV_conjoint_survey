@@ -270,7 +270,8 @@ temp <- data.frame(id = id, newID = seq(1:length(id)))
 choiceData <- choiceData %>% 
   left_join(temp, by = "id") %>% 
   select(-id) %>% 
-  rename(id = newID)
+  rename(id = newID) %>% 
+  arrange(id, qID)
 choiceData$obsID <- rep(seq(nrow(choiceData) / 4), each = 4)
 
 # Save formatted response data

@@ -24,13 +24,13 @@ source(here::here('code', '0setup.R'))
 
 # Read in choice data--------------
 
-choiceData <- read_csv(here::here('data_processed', 'choiceData.csv'))
+data <- read_csv(here::here('data_processed', 'choiceData.csv'))
 
 # -----------------------------------------------------------------------------
 # Dummy-code covariates
 
 # Create dummy coded variables
-data <- dummy_cols(choiceData, c('mode', 'automated', 'attendant')) %>%
+data <- dummy_cols(data, c('mode', 'automated', 'attendant')) %>%
   select(-mode_rail, -imgPath) %>% 
   mutate(
     travelTime_bus         = mode_bus*travelTime,
@@ -51,6 +51,8 @@ data <- dummy_cols(choiceData, c('mode', 'automated', 'attendant')) %>%
   ) %>% 
   select(id, obsID, choice, weights, everything()) %>% 
   arrange(id)
+
+data$obsID <- rep(seq(nrow(data) / 4), each = 4)
 
 # Setup some common objects
 
@@ -85,7 +87,7 @@ estimate_model <- function(
     obsID      = "obsID",
     panelID    = "id",
     clusterID  = "id",
-    pars       = pars_wtp,
+    pars       = pars,
     scalePar   = "price",
     randPars   = randPars,
     numDraws   = numDraws,
@@ -99,7 +101,7 @@ estimate_model <- function(
 # Models on entire sample ----------
 
 mxl_wtp <- estimate_model(
-  data, pars, randPars, numDraws, drawType, numCores, numMultiStarts
+  data, pars, randPars, numDraws, drawType, numCores, numMultiStarts = 1
 )
 
 mxl_wtp_weighted <- estimate_model(
