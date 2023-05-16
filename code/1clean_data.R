@@ -264,14 +264,14 @@ choiceData <- data_filtered %>%
     choice = ifelse(selection == altID, 1, 0)
   )
 
+# Over-write IDs
 id <-  sort(unique(choiceData$id))
-
 temp <- data.frame(id = id, newID = seq(1:length(id)))
-
 choiceData <- choiceData %>% 
   left_join(temp, by = "id") %>% 
   select(-id) %>% 
   rename(id = newID)
+choiceData$obsID <- rep(seq(nrow(choiceData) / 4), each = 4)
 
 # Save formatted response data
 write_csv(choiceData, here::here('data_processed', 'choiceData.csv'))

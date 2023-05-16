@@ -1,5 +1,7 @@
 # Estimate mixed logit (mxl) models
-# NOTE: The mxl models take a while (over an hour each) to run. We recommend running the code overnight.
+#
+# NOTE: Due to using a multistart, the mxl models can take a while 
+# (over an hour each) to run. We recommend running the code overnight.
 
 # Load libraries and settings
 source(here::here('code', '0setup.R'))
@@ -22,10 +24,10 @@ source(here::here('code', '0setup.R'))
 
 # Read in choice data--------------
 
-choiceData <- read_csv(here::here('data_processed', 'choiceData_Income.csv')) # TESTING INCOME
+choiceData <- read_csv(here::here('data_processed', 'choiceData.csv'))
 
 # -----------------------------------------------------------------------------
-# Estimate models where all covariates are dummy coded
+# Dummy-code covariates
 
 # Create dummy coded variables
 data <- dummy_cols(choiceData, c('mode', 'automated', 'attendant')) %>%
@@ -46,8 +48,6 @@ data <- dummy_cols(choiceData, c('mode', 'automated', 'attendant')) %>%
   ) %>% 
   select(id, obsID, choice, weights, everything()) %>% 
   arrange(id)
-
-data$obsID = rep(seq(nrow(data) / 4), each = 4)
 
 # Setup some common objects
 
