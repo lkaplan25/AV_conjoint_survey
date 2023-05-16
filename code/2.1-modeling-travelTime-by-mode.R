@@ -60,7 +60,7 @@ data$obsID = rep(seq(nrow(data) / 4), each = 4)
 
 numDraws <- 300
 numMultiStarts <- 30
-numCores <- 7
+numCores <- 2
 
 pars_pref <- c(
   "price", "travelTime",
