@@ -12,7 +12,6 @@ raw_data_P2 <- read_csv(here("data_raw", "AV_formr_conjoint_P2_v3.csv"))
 raw_data_P3 <- read_csv(here("data_raw", "AV_formr_conjoint_P3_v3.csv"))
 raw_data_P4 <- read_csv(here("data_raw", "AV_formr_conjoint_P4_v3.csv"))
 
-
 #Format start survey
 raw_data_start <- raw_data_start_path %>%
   filter(!is.na(ended)) %>% 
@@ -120,10 +119,7 @@ data_clean <- raw_data %>%
 
 data_clean$id = seq(nrow(data_clean)) 
 
-write_csv(data_clean, here::here('data_processed', 'data_clean.csv')) 
-
-
-data <- read_csv(here::here('data_processed', 'data_clean.csv'))
+data <- data_clean
 
 ## Filter out responses------------
 
@@ -229,63 +225,6 @@ data_filtered <- data_filtered %>%
       TRUE ~ "A") #Mid/High income
   ) 
 
-write_csv(data_filtered, here::here('data_processed', 'data_filtered.csv'))
-
-
-
-# Creating dfs of choices---------------
-
-# Choice set with just missing gender info removed------------------------------------------
-
-# Load the survey data set:
-
-survey <- read_csv(here::here('data_raw', 'survey.csv'))
-data_filtered <- read_csv(here::here('data_processed', 'data_filtered.csv')) %>% 
-  select(session, respondentID, id, cbc1, cbc2, cbc3, cbc4, cbc5, cbc6, cbc7, cbc8, everything())
-
-
-# Remove participants who are missing gender info 
-
-data_filtered <- data_filtered %>%
-  filter(genderGroup != "unknown") 
-
-dim(data_filtered)
-
-# Merge responses with survey designs to get choiceData 
-
-choiceData <- data_filtered %>%  
-  select(respondentID, cbc1:cbc8, genderGroup, incomeGroup, id) %>% 
-  mutate(
-    weights = ifelse(genderGroup == "B", 1.15, .75) # added in weights for gender
-  ) %>% 
-  gather(
-    key = "qID",
-    value = "selection",
-    cbc1:cbc8
-  ) %>% 
-  mutate(
-    qID = str_replace(qID, "cbc", ""),
-    qID = as.numeric(qID),
-    respondentID = as.numeric(respondentID)
-  ) %>%
-  left_join(survey, by = c("respondentID" = "respID", "qID")) %>%
-  mutate(
-    choice = ifelse(selection == altID, 1, 0)
-  )
-
-id <-  sort(unique(choiceData$id))
-
-temp <- data.frame(id = id, newID = seq(1:length(id)))
-
-choiceData <- choiceData %>% 
-  left_join(temp, by = "id") %>% 
-  select(-id) %>% 
-  rename(id = newID)
-
-# Save formatted response data
-write_csv(choiceData, here::here('data_processed', 'choiceData_gender.csv'))
-
-
 # Creating dfs of choices---------------
 
 # Choice set with missing gender AND missing income info removed------------------------------------------
@@ -293,9 +232,8 @@ write_csv(choiceData, here::here('data_processed', 'choiceData_gender.csv'))
 # Load the survey data set:
 
 survey <- read_csv(here::here('data_raw', 'survey.csv'))
-data_filtered <- read_csv(here::here('data_processed', 'data_filtered.csv')) %>% 
+data_filtered <- data_filtered %>% 
   select(session, respondentID, id, cbc1, cbc2, cbc3, cbc4, cbc5, cbc6, cbc7, cbc8, everything())
-
 
 # Remove participants who are missing gender info 
 
@@ -336,6 +274,4 @@ choiceData <- choiceData %>%
   rename(id = newID)
 
 # Save formatted response data
-write_csv(choiceData, here::here('data_processed', 'choiceData_income.csv'))
-
-
+write_csv(choiceData, here::here('data_processed', 'choiceData.csv'))

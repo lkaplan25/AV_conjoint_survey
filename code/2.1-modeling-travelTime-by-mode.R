@@ -27,12 +27,11 @@ options(dplyr.width = Inf)
 
 choiceData <- read_csv(here::here('data_processed', 'choiceData_gender.csv')) 
 
-
 # Estimate models where all covariates are dummy coded
 
 # Create dummy coded variables
 data <- dummy_cols(choiceData, c('mode', 'automated', 'attendant')) %>%
-  select(-mode_rail, -imgPath) %>% 
+  dplyr::select(-mode_rail, -imgPath) %>%
   mutate(
     # Adding in mode-specific travelTimes
     travelTime_bus         = mode_bus*travelTime,
@@ -58,8 +57,8 @@ data$obsID = rep(seq(nrow(data) / 4), each = 4)
 
 # Setup some common objects
 
-numDraws <- 300
-numMultiStarts <- 30
+numDraws <- 500
+numMultiStarts <- 1
 numCores <- 2
 
 pars_pref <- c(
@@ -79,8 +78,8 @@ pars_wtp <- c(
 )
 
 randPars = c(
-  travelTime = 'n',
-  travelTime_bus = 'n', travelTime_RH = 'n', travelTime_sharedRH = 'n',
+  # travelTime = 'n',
+  # travelTime_bus = 'n', travelTime_RH = 'n', travelTime_sharedRH = 'n',
   mode_bus = 'n', bus_automated_yes = 'n', bus_attendant_yes = 'n',
   mode_RH = 'n', RH_automated_yes = 'n', RH_attendant_yes = 'n',
   mode_sharedRH = 'n', sharedRH_automated_yes = 'n', sharedRH_attendant_yes = 'n'
@@ -110,6 +109,7 @@ mxl_wtp <- logitr(
   panelID    = "id",
   clusterID  = "id",
   numDraws   = numDraws,
+  drawType = 'sobol',
   scalePar   = "price",
   pars       = pars_wtp,
   randPars   = randPars,

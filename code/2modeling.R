@@ -20,11 +20,9 @@ source(here::here('code', '0setup.R'))
 # "price"        = Purchase price in dollars
 # "travelTime"   = Travel time in minutes
 
-
 # Read in choice data--------------
 
 choiceData <- read_csv(here::here('data_processed', 'choiceData_Income.csv')) # TESTING INCOME
-
 
 # -----------------------------------------------------------------------------
 # Estimate models where all covariates are dummy coded

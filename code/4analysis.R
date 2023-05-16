@@ -2,8 +2,8 @@
 source(here::here('code', '0setup.R'))
 
 # Load models
-load(here::here("models", "mxl.RData"))
-load(here::here("models", "mxl_v2.RData"))
+# load(here::here("models", "mxl.RData"))
+load(here::here("models", "mxl_travelTime_by_mode.RData"))
 load(here::here("models", "mxl_gender.RData"))
 load(here::here("models", "mxl_income.RData"))
 
@@ -15,17 +15,17 @@ load(here::here("models", "mxl_income.RData"))
 # Estimate WTP in WTP space model:
 coefs <- coef(mxl_wtp)
 covariance <- vcov(mxl_wtp)
-wtp_draws <- as.data.frame(mvrnorm(10^4, coefs, covariance))
+wtp_draws <- as.data.frame(MASS::mvrnorm(10^4, coefs, covariance))
 
 # Computing the combinations of WTP draws
 wtp_draws <- wtp_draws %>% 
   mutate(
-    wtp_bus_autoYes = mode_bus_mu + bus_automated_yes_mu,
-    wtp_bus_autoYes_attendantYes = mode_bus_mu + bus_automated_yes_mu + bus_attendant_yes_mu,
-    wtp_RH_autoYes = mode_RH_mu + RH_automated_yes_mu,
-    wtp_RH_autoYes_attendantYes = mode_RH_mu + RH_automated_yes_mu + RH_attendant_yes_mu,
-    wtp_sharedRH_autoYes = mode_sharedRH_mu + sharedRH_automated_yes_mu,
-    wtp_sharedRH_autoYes_attendantYes = mode_sharedRH_mu + sharedRH_automated_yes_mu + sharedRH_attendant_yes_mu
+    wtp_bus_autoYes = mode_bus + bus_automated_yes,
+    wtp_bus_autoYes_attendantYes = mode_bus + bus_automated_yes + bus_attendant_yes,
+    wtp_RH_autoYes = mode_RH + RH_automated_yes,
+    wtp_RH_autoYes_attendantYes = mode_RH + RH_automated_yes + RH_attendant_yes,
+    wtp_sharedRH_autoYes = mode_sharedRH + sharedRH_automated_yes,
+    wtp_sharedRH_autoYes_attendantYes = mode_sharedRH + sharedRH_automated_yes + sharedRH_attendant_yes
   )
 
 wtp_ci2 <- ci(wtp_draws)
@@ -40,9 +40,9 @@ wtp_ci <- wtp_ci2
 # Separate coefficient CIs by attribute 
 wtp_ci$par <- row.names(wtp_ci)
 wtp_travelTime <- wtp_ci %>% filter(par == 'travelTime')
-wtp_mode <- wtp_ci %>% filter(par %in% c('mode_bus_mu', 'wtp_bus_autoYes', 'wtp_bus_autoYes_attendantYes', 
-                                         'mode_RH_mu', 'wtp_RH_autoYes', 'wtp_RH_autoYes_attendantYes', 
-                                         'mode_sharedRH_mu','wtp_sharedRH_autoYes', 'wtp_sharedRH_autoYes_attendantYes'))
+wtp_mode <- wtp_ci %>% filter(par %in% c('mode_bus', 'wtp_bus_autoYes', 'wtp_bus_autoYes_attendantYes',
+                                         'mode_RH', 'wtp_RH_autoYes', 'wtp_RH_autoYes_attendantYes',
+                                         'mode_sharedRH','wtp_sharedRH_autoYes', 'wtp_sharedRH_autoYes_attendantYes'))
 
 # Create data frames for plotting each attribute:
 #   level   = The attribute level (x-axis)
@@ -50,11 +50,11 @@ wtp_mode <- wtp_ci %>% filter(par %in% c('mode_bus_mu', 'wtp_bus_autoYes', 'wtp_
 
 df_mode <- wtp_mode %>% 
   mutate(mode = case_when(
-    par %in% c('mode_bus_mu', 'mode_RH_mu', 'mode_sharedRH_mu') ~ "Not\nAutomated",
+    par %in% c('mode_bus', 'mode_RH', 'mode_sharedRH') ~ "Not\nAutomated",
     par %in% c('wtp_bus_autoYes', 'wtp_RH_autoYes','wtp_sharedRH_autoYes') ~ "Automated,\nNo Attendant\nPresent",
     par %in% c('wtp_bus_autoYes_attendantYes', 'wtp_RH_autoYes_attendantYes','wtp_sharedRH_autoYes_attendantYes') ~ "Automated,\nAttendant\nPresent"
   ),
-  par = recode_factor(wtp_mode$par, "mode_bus_mu" = "Bus", "mode_RH_mu" = "Ride-hailing", "mode_sharedRH_mu" = "Shared Ride-hailing",
+  par = recode_factor(wtp_mode$par, "mode_bus" = "Bus", "mode_RH" = "Ride-hailing", "mode_sharedRH" = "Shared Ride-hailing",
                       'wtp_bus_autoYes' = "Bus", 'wtp_RH_autoYes' = "Ride-hailing",'wtp_sharedRH_autoYes' = "Shared Ride-hailing",
                       'wtp_bus_autoYes_attendantYes' = "Bus", 'wtp_RH_autoYes_attendantYes' = "Ride-hailing",'wtp_sharedRH_autoYes_attendantYes' = "Shared Ride-hailing")
   )
