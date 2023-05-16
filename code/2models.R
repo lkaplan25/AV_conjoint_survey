@@ -50,9 +50,7 @@ data <- dummy_cols(data, c('mode', 'automated', 'attendant')) %>%
     sharedRH_attendant_no  = mode_sharedRH*attendant_No,
   ) %>% 
   select(id, obsID, choice, weights, everything()) %>% 
-  arrange(id)
-
-data$obsID <- rep(seq(nrow(data) / 4), each = 4)
+  arrange(id, qID)
 
 # Setup some common objects
 
@@ -93,6 +91,7 @@ estimate_model <- function(
     numDraws   = numDraws,
     drawType   = drawType,
     numCores   = numCores,
+    robust     = TRUE,
     numMultiStarts = numMultiStarts,
     weights = weights
   )
@@ -101,7 +100,7 @@ estimate_model <- function(
 # Models on entire sample ----------
 
 mxl_wtp <- estimate_model(
-  data, pars, randPars, numDraws, drawType, numCores, numMultiStarts = 1
+  data, pars, randPars, numDraws, drawType, numCores, numMultiStarts
 )
 
 mxl_wtp_weighted <- estimate_model(

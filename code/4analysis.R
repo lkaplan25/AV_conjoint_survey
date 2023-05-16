@@ -65,7 +65,6 @@ df_mode <- wtp_mode %>%
 xmin <- floor(min(df_mode$lower))
 xmax <- ceiling(max(df_mode$upper))
 
-
 # Comparing all mode options 
 
 plot_mode_automated_attendant_All <- df_mode %>% 
