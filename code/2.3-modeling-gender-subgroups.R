@@ -32,6 +32,10 @@ choiceData <- read_csv(here::here('data_processed', 'choiceData_gender.csv'))
 data <- dummy_cols(choiceData, c('mode', 'automated', 'attendant')) %>%
   select(-mode_rail, -imgPath) %>% 
   mutate(
+    # Adding in mode-specific travelTimes
+    travelTime_bus         = mode_bus*travelTime,
+    travelTime_RH          = mode_RH*travelTime,
+    travelTime_sharedRH    = mode_sharedRH*travelTime,
     bus_automated_yes      = mode_bus*automated_Yes,
     bus_automated_no       = mode_bus*automated_No,
     bus_attendant_yes      = mode_bus*attendant_Yes,
@@ -118,14 +122,12 @@ mxl_wtp_gender_A <- logitr(
   panelID    = "id",
   clusterID  = "id",
   numDraws   = numDraws,
-  modelSpace = "wtp",
   price      = "price",
   pars       = pars_wtp,
   randPars   = randPars,
   numCores   = numCores,
   numMultiStarts = numMultiStarts
 )
-
 
 mxl_wtp_gender_B <- logitr(
   data       = data_B,
@@ -134,7 +136,6 @@ mxl_wtp_gender_B <- logitr(
   panelID    = "id",
   clusterID  = "id",
   numDraws   = numDraws,
-  modelSpace = "wtp",
   price      = "price",
   pars       = pars_wtp,
   randPars   = randPars,
