@@ -521,7 +521,7 @@ ggsave(
 
 ## Scenario 4 - Trip from Lower Income Area, using low-income model for this scenario
 
-bump_chart4 <- probs_mxl_wtp %>% 
+bump_chart4 <- probs_mxl_wtp_income_low %>% 
   filter(scenario_num == 4, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
   select(scenario_type, percent_red, everything()) %>% 
   mutate(
@@ -636,5 +636,15 @@ ggsave(
 )
 
 
+## Comparing scenario analyses outcomes full model vs. low income model -----
 
+full <- probs_mxl_wtp %>% 
+  filter(scenario_num == 4) %>% 
+  select(predicted_prob)
+
+low_income <- probs_mxl_wtp_income_low %>% 
+  filter(scenario_num == 4) %>% 
+  select(predicted_prob)
+
+summary(full - low_income)
 
