@@ -303,9 +303,6 @@ n <- length(price_reduction)  # Number of simulations
 
 scenarios <- rep_df(df, n)
 
-# test <- scenarios %>% 
-#   filter(mode == "RH")
-
 price_reduction <- rep(price_reduction, 18) #adjust based on number of scenarios or price levels
 
 scenarios[which(scenarios$mode == "RH"),]$price_reduction <- price_reduction
@@ -318,27 +315,26 @@ scenarios <- scenarios %>%
   )
 
 
-
 # Create dummy coded variables
 scenarios <- dummy_cols(scenarios, c('mode', 'automated', 'attendant')) %>% 
   select(-mode_rail) %>% 
   mutate(
-    bus_automated_yes = mode_bus*automated_Yes,
-    bus_automated_no = mode_bus*automated_No,
-    bus_attendant_yes = mode_bus*attendant_Yes,
-    bus_attendant_no = mode_bus*attendant_No,
-    RH_automated_yes = mode_RH*automated_Yes,
-    RH_automated_no = mode_RH*automated_No,
-    RH_attendant_yes = mode_RH*attendant_Yes,
-    RH_attendant_no = mode_RH*attendant_No,
+    travelTime_bus         = mode_bus*travelTime,
+    travelTime_RH          = mode_RH*travelTime,
+    travelTime_sharedRH    = mode_sharedRH*travelTime,
+    bus_automated_yes      = mode_bus*automated_Yes,
+    bus_automated_no       = mode_bus*automated_No,
+    bus_attendant_yes      = mode_bus*attendant_Yes,
+    bus_attendant_no       = mode_bus*attendant_No,
+    RH_automated_yes       = mode_RH*automated_Yes,
+    RH_automated_no        = mode_RH*automated_No,
+    RH_attendant_yes       = mode_RH*attendant_Yes,
+    RH_attendant_no        = mode_RH*attendant_No,
     sharedRH_automated_yes = mode_sharedRH*automated_Yes,
-    sharedRH_automated_no = mode_sharedRH*automated_No,
+    sharedRH_automated_no  = mode_sharedRH*automated_No,
     sharedRH_attendant_yes = mode_sharedRH*attendant_Yes,
-    sharedRH_attendant_no = mode_sharedRH*attendant_No
+    sharedRH_attendant_no  = mode_sharedRH*attendant_No
   )
-
-
-
 
 scenarios$obsID <- rep(seq(nrow(scenarios)/4), each = 4) # Reset obsIDs
 
@@ -346,28 +342,21 @@ scenarios$obsID <- rep(seq(nrow(scenarios)/4), each = 4) # Reset obsIDs
 ### Full model -----------------------------------------------------------------------------
 # For each case, simulate the market share predictions
 
-sens_price <- predict(
+probs_mxl_wtp <- predict(
   mxl_wtp,
   newdata = scenarios, 
   obsID = 'obsID', 
-  ci = 0.95,
-  returnData = TRUE,
-  scalePar = "price"
+  interval = "confidence",
+  returnData = "TRUE"
 ) 
 
-# %>% 
-#   mutate(
-#     price = as.double(price),
-#     percent_red = 1 - price_reduction
-#   )
-
-head(sens_price)
+head(probs_mxl_wtp)
 
 plot_red <- rep(rep(seq(0, .3, by = 0.05), each = 4), 18)
 
-sens_price$percent_red <- plot_red
+probs_mxl_wtp$percent_red <- plot_red
 
-sens_price <- sens_price %>% 
+probs_mxl_wtp <- probs_mxl_wtp %>% 
   mutate(
     scenario_type = case_when(
       (percent_red == 0.3) ~ paste0(scenario_type, "Discount"),
@@ -392,28 +381,19 @@ sens_price <- sens_price %>%
 ### Low-income model -----------------------------------------------------------------------------
 # For each case, simulate the market share predictions
 
-sens_price <- predict(
-  mnl_wtp_B,
+probs_mxl_wtp_income_low <- predict(
+  mxl_wtp_income_low,
   newdata = scenarios, 
   obsID = 'obsID', 
-  ci = 0.95,
-  returnData = TRUE,
-  scalePar = "price"
+  interval = "confidence",
+  returnData = "TRUE"
 )
 
-# %>% 
-#   mutate(
-#     scalePar = as.double(price),
-#     percent_red = 1 - price_reduction
-#   )
+head(probs_mxl_wtp_income_low)
 
-head(sens_price)
+probs_mxl_wtp_income_low$percent_red <- plot_red
 
-plot_red <- rep(rep(seq(0, .3, by = 0.05), each = 4), 18)
-
-sens_price$percent_red <- plot_red
-
-sens_price <- sens_price %>% 
+probs_mxl_wtp_income_low <- probs_mxl_wtp_income_low %>% 
   mutate(
     scenario_type = case_when(
       (percent_red == 0.3) ~ paste0(scenario_type, "Discount"),
@@ -440,14 +420,14 @@ sens_price <- sens_price %>%
 # Bump chart
 
 ## Scenario 1
-bump_chart1 <- sens_price %>% 
+bump_chart1 <- probs_mxl_wtp %>% 
   filter(scenario_num == 1, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
   select(scenario_type, percent_red, everything()) %>% 
   mutate(
     label = fct_relevel(label, c("Status Quo", "Automated", "Automated,\n30% discount", "Automated,\nattendant\npresent", "Automated,\nattendant present,\n30% discount" ))
   ) %>% 
   ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
-  geom_bump(size = .75) +
+  geom_bump(linewidth = .75) +
   #geom_ribbon(alpha = .2, color = NA) +
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
@@ -475,14 +455,14 @@ ggsave(
 )
 
 ## Scenario 2
-bump_chart2 <- sens_price %>% 
+bump_chart2 <- probs_mxl_wtp %>% 
   filter(scenario_num == 2, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
   select(scenario_type, percent_red, everything()) %>% 
   mutate(
     label = fct_relevel(label, c("Status Quo", "Automated", "Automated,\n30% discount", "Automated,\nattendant\npresent", "Automated,\nattendant present,\n30% discount" ))
   ) %>% 
   ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
-  geom_bump(size = .75) + 
+  geom_bump(linewidth = .75) + 
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
   geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) +
@@ -501,14 +481,14 @@ bump_chart2 <- sens_price %>%
 bump_chart2
 
 ## Scenario 3
-bump_chart3 <- sens_price %>% 
+bump_chart3 <- probs_mxl_wtp %>% 
   filter(scenario_num == 3, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
   select(scenario_type, percent_red, everything()) %>% 
   mutate(
     label = fct_relevel(label, c("Status Quo", "Automated", "Automated,\n30% discount", "Automated,\nattendant\npresent", "Automated,\nattendant present,\n30% discount" ))
   ) %>% 
   ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
-  geom_bump(size = .75) + 
+  geom_bump(linewidth = .75) + 
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
   geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) +
@@ -527,16 +507,16 @@ bump_chart3 <- sens_price %>%
 
 bump_chart3
 
-## Scenario 4
+## Scenario 4 - Trip from Lower Income Area, using low-income model for this scenario
 
-bump_chart4 <- sens_price %>% 
+bump_chart4 <- probs_mxl_wtp_income_low %>% 
   filter(scenario_num == 4, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
   select(scenario_type, percent_red, everything()) %>% 
   mutate(
     label = fct_relevel(label, c("Status Quo", "Automated", "Automated,\n30% discount", "Automated,\nattendant\npresent", "Automated,\nattendant present,\n30% discount" ))
   ) %>% 
   ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
-  geom_bump(size = .75) + 
+  geom_bump(linewidth = .75) + 
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
   geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) +
@@ -557,14 +537,14 @@ bump_chart4
 
 ## Scenario 5
 
-bump_chart5 <- sens_price %>% 
+bump_chart5 <- probs_mxl_wtp %>% 
   filter(scenario_num == 5, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
   select(scenario_type, percent_red, everything()) %>% 
   mutate(
     label = fct_relevel(label, c("Status Quo", "Automated", "Automated,\n30% discount", "Automated,\nattendant\npresent", "Automated,\nattendant present,\n30% discount" ))
   ) %>% 
   ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
-  geom_bump(size = .75) + 
+  geom_bump(linewidth = .75) + 
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
   geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) + #changed from last.points
@@ -590,14 +570,14 @@ ggsave(
 
 ## Scenario 6
 
-bump_chart6 <- sens_price %>% 
+bump_chart6 <- probs_mxl_wtp %>% 
   filter(scenario_num == 6, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
   select(scenario_type, percent_red, everything()) %>% 
   mutate(
     label = fct_relevel(label, c("Status Quo", "Automated", "Automated,\n30% discount", "Automated,\nattendant\npresent", "Automated,\nattendant present,\n30% discount" ))
   ) %>% 
   ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
-  geom_bump(size = .75) + 
+  geom_bump(linewidth = .75) + 
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
   geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) +
