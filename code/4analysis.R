@@ -419,32 +419,43 @@ probs_mxl_wtp_income_low <- probs_mxl_wtp_income_low %>%
 #--------------------------
 # Bump chart
 
+get_scenario <- function(probs_model, scenario) {
+  probs_model <- probs_model %>% 
+    filter(scenario_num == scenario, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
+    mutate(
+      label = fct_relevel(label, c("Status Quo", "Automated", "Automated,\n30% discount", "Automated,\nattendant\npresent", "Automated,\nattendant present,\n30% discount" )))
+  return(probs_model)
+}
+
+bump_plot_theme <- function() {
+  return(
+    theme_minimal_hgrid(font_size = 10) +
+      theme(
+        legend.position = "none",
+        text = element_text(family = "Fira Sans")
+      )
+  )
+}
+
 ## Scenario 1
-bump_chart1 <- probs_mxl_wtp %>% 
-  filter(scenario_num == 1, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
-  select(scenario_type, percent_red, everything()) %>% 
-  mutate(
-    label = fct_relevel(label, c("Status Quo", "Automated", "Automated,\n30% discount", "Automated,\nattendant\npresent", "Automated,\nattendant present,\n30% discount" ))
-  ) %>% 
+
+s1 <- get_scenario(probs_mxl_wtp, 1)
+
+bump_chart1 <- s1 %>% 
   ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
   geom_bump(linewidth = .75) +
   #geom_ribbon(alpha = .2, color = NA) +
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
   geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) +
-  theme_minimal_hgrid(font_size = 10) +
-  theme(legend.position = "none",
-        #axis.text.x=element_blank(),
-        text = element_text(family = "Fira Sans")
-  ) +
   labs(
-    title = "Pro-Rail Scenario",
+    title = "Pro-Rail Scenario_TEST",
     x = NULL,
     y = "Market Share"
   ) +
   scale_color_brewer(palette = "Set1") +
-  scale_x_discrete(expand = expansion(add = c(.5, 1)))
-
+  scale_x_discrete(expand = expansion(add = c(.5, 1))) +
+  bump_plot_theme()
 
 bump_chart1
 
@@ -454,10 +465,12 @@ ggsave(
   width = 7, height = 4
 )
 
-## Scenario 2
-bump_chart2 <- probs_mxl_wtp %>% 
+## Scenario 2 - FIX FROM HERE
+
+s2 <- get_scenario(probs_mxl_wtp, 2)
+
+bump_chart2 <- s2 %>% 
   filter(scenario_num == 2, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
-  select(scenario_type, percent_red, everything()) %>% 
   mutate(
     label = fct_relevel(label, c("Status Quo", "Automated", "Automated,\n30% discount", "Automated,\nattendant\npresent", "Automated,\nattendant present,\n30% discount" ))
   ) %>% 
@@ -466,17 +479,14 @@ bump_chart2 <- probs_mxl_wtp %>%
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
   geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) +
-  theme_minimal_hgrid(font_size = 10) +
-  theme(legend.position = "none",
-        text = element_text(family = "Fira Sans")
-  ) +
   labs(
     title = "Rail with Transfer Scenario",
     x = NULL,
     y = "Market Share"
   ) +
   scale_color_brewer(palette = "Set1") +
-  scale_x_discrete(expand = expansion(add = c(.5, 1)))
+  scale_x_discrete(expand = expansion(add = c(.5, 1))) +
+  bump_plot_theme()
 
 bump_chart2
 
@@ -489,7 +499,6 @@ ggsave(
 ## Scenario 3
 bump_chart3 <- probs_mxl_wtp %>% 
   filter(scenario_num == 3, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
-  select(scenario_type, percent_red, everything()) %>% 
   mutate(
     label = fct_relevel(label, c("Status Quo", "Automated", "Automated,\n30% discount", "Automated,\nattendant\npresent", "Automated,\nattendant present,\n30% discount" ))
   ) %>% 
@@ -498,18 +507,14 @@ bump_chart3 <- probs_mxl_wtp %>%
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
   geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) +
-  theme_minimal_hgrid(font_size = 10) +
-  theme(legend.position = "none",
-        axis.text.x=element_blank(),
-        text = element_text(family = "Fira Sans")
-  ) +
   labs(
     title = "Pro-Bus Scenario",
     x = NULL,
     y = NULL
   ) +
   scale_color_brewer(palette = "Set1") +
-  scale_x_discrete(expand = expansion(add = c(.5, 1)))
+  scale_x_discrete(expand = expansion(add = c(.5, 1))) +
+  bump_plot_theme()
 
 bump_chart3
 
@@ -523,7 +528,6 @@ ggsave(
 
 bump_chart4 <- probs_mxl_wtp_income_low %>% 
   filter(scenario_num == 4, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
-  select(scenario_type, percent_red, everything()) %>% 
   mutate(
     label = fct_relevel(label, c("Status Quo", "Automated", "Automated,\n30% discount", "Automated,\nattendant\npresent", "Automated,\nattendant present,\n30% discount" ))
   ) %>% 
@@ -532,18 +536,14 @@ bump_chart4 <- probs_mxl_wtp_income_low %>%
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
   geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) +
-  theme_minimal_hgrid(font_size = 10) +
-  theme(legend.position = "none",
-        axis.text.x=element_blank(),
-        text = element_text(family = "Fira Sans")
-  ) +
   labs(
     title = "Trip from Lower Income Area Scenario",
     x = NULL,
     y = NULL
   ) +
   scale_color_brewer(palette = "Set1") +
-  scale_x_discrete(expand = expansion(add = c(.5, 1)))
+  scale_x_discrete(expand = expansion(add = c(.5, 1))) +
+  bump_plot_theme()
 
 bump_chart4
 
@@ -557,7 +557,6 @@ ggsave(
 
 bump_chart5 <- probs_mxl_wtp %>% 
   filter(scenario_num == 5, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
-  select(scenario_type, percent_red, everything()) %>% 
   mutate(
     label = fct_relevel(label, c("Status Quo", "Automated", "Automated,\n30% discount", "Automated,\nattendant\npresent", "Automated,\nattendant present,\n30% discount" ))
   ) %>% 
@@ -566,17 +565,14 @@ bump_chart5 <- probs_mxl_wtp %>%
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
   geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) + #changed from last.points
-  theme_minimal_hgrid(font_size = 10) +
-  theme(legend.position = "none",
-        #axis.text.x=element_blank(),
-        text = element_text(family = "Fira Sans")) +
   labs(
     title = "Long Trip Scenario",
     x = NULL,
     y = "Market Share"
   ) +
   scale_color_brewer(palette = "Set1") +
-  scale_x_discrete(expand = expansion(add = c(.5, 1)))
+  scale_x_discrete(expand = expansion(add = c(.5, 1))) +
+  bump_plot_theme()
 
 bump_chart5
 
@@ -590,7 +586,6 @@ ggsave(
 
 bump_chart6 <- probs_mxl_wtp %>% 
   filter(scenario_num == 6, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
-  select(scenario_type, percent_red, everything()) %>% 
   mutate(
     label = fct_relevel(label, c("Status Quo", "Automated", "Automated,\n30% discount", "Automated,\nattendant\npresent", "Automated,\nattendant present,\n30% discount" ))
   ) %>% 
@@ -599,16 +594,14 @@ bump_chart6 <- probs_mxl_wtp %>%
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
   geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) +
-  theme_minimal_hgrid(font_size = 10) +
-  theme(legend.position = "none",
-        text = element_text(family = "Fira Sans")) +
   labs(
     title = "Bad Transit Options Scenario",
     x = NULL,
     y = NULL
   ) +
   scale_color_brewer(palette = "Set1") +
-  scale_x_discrete(expand = expansion(add = c(.5, 1)))
+  scale_x_discrete(expand = expansion(add = c(.5, 1))) +
+  bump_plot_theme()
 
 bump_chart6
 
