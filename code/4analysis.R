@@ -480,6 +480,12 @@ bump_chart2 <- probs_mxl_wtp %>%
 
 bump_chart2
 
+ggsave(
+  filename = here('figs', 'rail_with_transfer.png'), 
+  plot = bump_chart2, 
+  width = 7, height = 4
+)
+
 ## Scenario 3
 bump_chart3 <- probs_mxl_wtp %>% 
   filter(scenario_num == 3, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
@@ -507,9 +513,15 @@ bump_chart3 <- probs_mxl_wtp %>%
 
 bump_chart3
 
+ggsave(
+  filename = here('figs', 'proBus_scenario.png'), 
+  plot = bump_chart3, 
+  width = 7, height = 4
+)
+
 ## Scenario 4 - Trip from Lower Income Area, using low-income model for this scenario
 
-bump_chart4 <- probs_mxl_wtp_income_low %>% 
+bump_chart4 <- probs_mxl_wtp %>% 
   filter(scenario_num == 4, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
   select(scenario_type, percent_red, everything()) %>% 
   mutate(
@@ -534,6 +546,12 @@ bump_chart4 <- probs_mxl_wtp_income_low %>%
   scale_x_discrete(expand = expansion(add = c(.5, 1)))
 
 bump_chart4
+
+ggsave(
+  filename = here('figs', 'low_income_scenario_lowIncomeModel.png'), 
+  plot = bump_chart5, 
+  width = 7, height = 4
+)
 
 ## Scenario 5
 
