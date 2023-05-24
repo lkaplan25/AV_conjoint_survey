@@ -60,18 +60,7 @@ finalSample <- finalSample %>%
     income = case_when(
       income %in% c("under10", "inc_10to15") ~ "inc_under15",
       income %in% c("inc_150to200", "inc_over200") ~ "inc_over150",
-      TRUE ~ income
-    )
-  )
-
-set_gtsummary_theme(theme_gtsummary_compact())
-
-
-demoSummary <- finalSample %>% 
-  mutate(
-    income = fct_relevel(income, "inc_under15", "inc_15to25", "inc_25to35", "inc_35to50", "inc_50to75", "inc_75to100", "inc_100to150", "inc_over150"),
-    gender = fct_relevel(gender, "male", "female"),
-    income = recode_factor(finalSample$income, "inc_under15" = "Less than $15,000", "inc_15to25" = "$15,000 - $24,999", "inc_25to35" = "$25,000 - $34,999", "inc_35to50" = "$35,000 - $49,999", "inc_50to75" = "$50,000 - $74,999", "inc_75to100" = "$75,000 - $99,999", "inc_100to150" = "$100,000 - $149,999", "inc_over150" = "$150,000 or more"),
+      TRUE ~ income),
     gender = case_when(
       gender == "male" ~ "Male",
       gender == "female" ~ "Female",
@@ -81,10 +70,16 @@ demoSummary <- finalSample %>%
       education %in% c("college_some", "vocational", "degree_associate") ~ "Some College/Associate's",
       education == "degree_bs" ~ "Bachelor's degree",
       education == "degree_grad" ~ "Graduate or Professional Degree"
-    ),
-     education = fct_relevel(education, "No High school or High School", "Some College/Associate's", "Bachelor's degree", "Graduate or Professional Degree"),
-    bankAccountAccess = recode_factor(finalSample$bankAccountAccess, no = "No", yes = "Yes", nonreg = "Doesn't use regularly"),
-    phoneAccess = recode_factor(finalSample$phoneAccess, noPhone = "No cellphone", nonSmartphone = "No smartphone", smartphone = "Has smartphone"),
+    )
+  )
+
+set_gtsummary_theme(theme_gtsummary_compact())
+
+
+demoSummary <- finalSample %>% 
+  mutate(
+    income = fct_relevel(finalSample$income, "inc_under15", "inc_15to25", "inc_25to35", "inc_35to50", "inc_50to75", "inc_75to100", "inc_100to150", "inc_over150"),
+    gender = fct_relevel(finalSample$gender, "male", "female"),
     disability = case_when(
       disability %in% c("none", "intellectual, none", "physical, none", "physical, visual, intellectual, none", "visual, none") ~ "None",
       disability == "intellectual" ~ "Intellectual",
@@ -92,7 +87,6 @@ demoSummary <- finalSample %>%
       disability %in% c('visual', 'visual, intellectual') ~ "Visual",
       disability == "physical, visual" ~ "Physical and Visual"
     ),
-    disability = fct_relevel(disability, "None", "Intellectual", "Physical", "Visual", "Physical and Visual"),
     age = 2021 - as.numeric(yearOfBirth),
     ageGroups = case_when(
      age <= 24 ~ "18-24",
@@ -104,10 +98,19 @@ demoSummary <- finalSample %>%
      (age > 74 & age <= 84) ~ "75-84",
      age > 84 ~ "85+"
     )
-    ) %>% 
-  select(gender, ageGroups, income, education, bankAccountAccess, phoneAccess, disability) 
+  )
 
-demoSummary <- demoSummary %>% 
+demoSummary_renamed <- demoSummary %>% 
+  mutate(
+    income = recode_factor(demoSummary$income, "inc_under15" = "Less than $15,000", "inc_15to25" = "$15,000 - $24,999", "inc_25to35" = "$25,000 - $34,999", "inc_35to50" = "$35,000 - $49,999", "inc_50to75" = "$50,000 - $74,999", "inc_75to100" = "$75,000 - $99,999", "inc_100to150" = "$100,000 - $149,999", "inc_over150" = "$150,000 or more"),
+    bankAccountAccess = recode_factor(demoSummary$bankAccountAccess, no = "No", yes = "Yes", nonreg = "Doesn't use regularly"),
+    phoneAccess = recode_factor(demoSummary$phoneAccess, noPhone = "No cellphone", nonSmartphone = "No smartphone", smartphone = "Has smartphone"),
+    disability = fct_relevel(demoSummary$disability, "None", "Intellectual", "Physical", "Visual", "Physical and Visual"),
+    education = fct_relevel(demoSummary$education, "No High school or High School", "Some College/Associate's", "Bachelor's degree", "Graduate or Professional Degree")
+    ) %>%
+  select(gender, ageGroups, income, education, bankAccountAccess, phoneAccess, disability)
+
+demoTable <- demoSummary_renamed %>% 
   gtsummary::tbl_summary(label = list(gender ~ "Gender", ageGroups ~ "Age", income ~ "Annual Household Income", education ~ "Education", bankAccountAccess ~ "Bank Account Access", phoneAccess ~ "Phone Access", disability ~ "Disability")) %>% 
   as_flex_table(
   include = everything(),
@@ -116,7 +119,7 @@ demoSummary <- demoSummary %>%
 )
 
 save_as_docx(
-  "Demographic Table" = demoSummary,
+  "Demographic Table" = demoTable,
   path = here::here("charts", 'Demographic_Table.docx'))
 
 ```
@@ -280,11 +283,6 @@ names(summary_final) <- c("coefficient", "MXL", "MXL_male", "MXL_female", "MXL_m
 #FLEXTABLE
 summary1 <- flextable(as.data.frame(summary_final))
 theme_vanilla(summary1)
-
-summary1<- autofit(summary1)
-summary1 <- add_footer_lines(summary1, values = "Signif. codes:  '***' = 0.001, '**' = 0.01, '*' = 0.05, '.' = 0.1, ' ' = 1")
-summary1 <- align(summary1, align = "right", part = "body")
-print(summary1, preview = "docx")
 
 save_as_docx(
   "Coef_Table" = summary1,
