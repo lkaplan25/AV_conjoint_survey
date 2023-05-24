@@ -78,7 +78,8 @@ plot_theme <- function() {
       strip.text.y = element_text(angle = 0),
       axis.title.y = element_blank(),
       axis.title.x = element_text(size = 12),
-      plot.subtitle = element_text(face = "plain", size = 12)
+      plot.subtitle = element_text(face = "plain", size = 12),
+      legend.position = "none"
     )
   )
 }
@@ -193,8 +194,8 @@ plot_mode_automated_attendant_gender <- wtp_mode %>%
   scale_color_manual(values = plotColors) +
   labs(
     y = NULL, 
-    x = 'Willingness to Pay ($1) relative to rail'
-    #subtitle = "Men willing to pay more than women for automation + attendant"
+    x = 'Willingness to Pay ($1) relative to rail',
+    subtitle = "Automation + attendant changes willingness to pay more for men than women"
   ) +
     geom_vline(xintercept = 0, linetype = "dashed") +
   plot_theme() 
