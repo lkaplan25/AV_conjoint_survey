@@ -206,7 +206,7 @@ plot_mode_automated_attendant_gender
 ggsave(
   filename = here::here('figs', 'mxl_wtp_gender.png'),
   plot = plot_mode_automated_attendant_gender,
-  width = 7, height = 3.75
+  width = 7, height = 4
 )
 
 ### Income---------
@@ -460,7 +460,7 @@ bump_chart1 <- s1 %>%
 bump_chart1
 
 ggsave(
-  filename = here('figs', 'proRailScenario.png'), 
+  filename = here::here('figs', 'proRailScenario.png'), 
   plot = bump_chart1, 
   width = 7, height = 4
 )
@@ -491,7 +491,7 @@ bump_chart2 <- s2 %>%
 bump_chart2
 
 ggsave(
-  filename = here('figs', 'rail_with_transfer.png'), 
+  filename = here::here('figs', 'rail_with_transfer.png'), 
   plot = bump_chart2, 
   width = 7, height = 4
 )
@@ -518,7 +518,7 @@ bump_chart3 <- s3 %>%
 bump_chart3
 
 ggsave(
-  filename = here('figs', 'proBus_scenario.png'), 
+  filename = here::here('figs', 'proBus_scenario.png'), 
   plot = bump_chart3, 
   width = 7, height = 4
 )
@@ -535,7 +535,7 @@ bump_chart4 <- s4 %>%
   #geom_errorbar(width = 0.3) +
   geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) +
   labs(
-    title = "Trip from Lower Income Area Scenario",
+    title = "Trip from Lower Income Area Scenario (low income model)",
     x = NULL,
     y = NULL
   ) +
@@ -546,7 +546,7 @@ bump_chart4 <- s4 %>%
 bump_chart4
 
 ggsave(
-  filename = here('figs', 'low_income_scenario_lowIncomeModel.png'), 
+  filename = here::here('figs', 'low_income_scenario_lowIncomeModel.png'), 
   plot = bump_chart5, 
   width = 7, height = 4
 )
@@ -573,7 +573,7 @@ bump_chart5 <- s5 %>%
 bump_chart5
 
 ggsave(
-  filename = here('figs', 'longTripScenario.png'), 
+  filename = here::here('figs', 'longTripScenario.png'), 
   plot = bump_chart5, 
   width = 7, height = 4
 )
@@ -600,7 +600,7 @@ bump_chart6 <- s6 %>%
 bump_chart6
 
 ggsave(
-  filename = here('figs', 'badTransitOptionsScenario.png'), 
+  filename = here::here('figs', 'badTransitOptionsScenario.png'), 
   plot = bump_chart6, 
   width = 7, height = 4
 )
@@ -617,7 +617,7 @@ scenarioPlotAll <- plot_grid(
 )
 
 ggsave(
-  filename = here('figs', 'scenarioPlotAll.png'), 
+  filename = here::here('figs', 'scenarioPlotAll.png'), 
   plot = scenarioPlotAll, 
   width = 10, height = 6.5
 )

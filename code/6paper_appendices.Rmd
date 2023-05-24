@@ -30,8 +30,8 @@ knitr::opts_chunk$set(
 source(here::here('code', '0setup.R'))
 
 # Load models
-load(here::here("models", "mxl.RData"))
-load(here::here("models", "mxl_gender.RData"))
+mxl_wtp <- readRDS(here::here("models", "mxl_wtp.Rds"))
+mxl_wtp_weighted <- readRDS(here::here("models", "mxl_wtp_weighted.Rds"))
 
 plotColors <- c('sienna','#e2a8a6' , 'grey60','lightsteelblue', 'steelblue')
 base <- 7
@@ -414,12 +414,13 @@ Please let us know if you have any other thoughts or feedback on this survey. Yo
 
 
 ```{r makeTableFunction, echo = FALSE}
+
 make_coef_table <- function(model) {
 
   summary <- coef(summary(model)) %>%
     round(3) %>%
     rownames_to_column() %>%
-    rename(
+    dplyr::rename(
       "coefficients" = "rowname",
       "prob" = "Pr(>|z|)") %>%
     mutate(
@@ -430,9 +431,9 @@ make_coef_table <- function(model) {
         prob > 0.05 & prob <= 0.1, '.', '   ')))),
       sig2 = ifelse(
         prob <= 0.001,'***', ifelse(
-          prob > 0.001 & prob <= 0.01, '**', ifelse(
-            prob > 0.01 & prob <= 0.05, '*', ifelse(
-              prob > 0.05 & prob <= 0.1, '.', ""))))
+          prob > 0.001 & prob <= 0.01, ' **', ifelse(
+            prob > 0.01 & prob <= 0.05, '  *', ifelse(
+              prob > 0.05 & prob <= 0.1, '   .', "    ;"))))
     ) %>%
     mutate(
       Estimate = sprintf("%.3f", Estimate),
@@ -446,6 +447,7 @@ make_coef_table <- function(model) {
     return(summary)
 }
 
+
 ```
 
 
@@ -453,36 +455,48 @@ make_coef_table <- function(model) {
 
 # Make coefficient tables
 results_mxl <- make_coef_table(mxl_wtp)
-results_mxl_weighted <- make_coef_table(mxl_wtp)
+results_mxl_weighted <- make_coef_table(mxl_wtp_weighted)
 
 #join
 summary_final <- results_mxl %>%
-  full_join(results_mxl_weighted, by = "coefficients") %>%
-  mutate(
-    coefficients = as.factor(coefficients),
-    coefficients = coefficients %>% fct_relevel("lambda",
-                             "travelTime_mu", "travelTime_sigma" ,
-                             "mode_bus_mu", "mode_bus_sigma",
-                             "bus_automated_yes_mu",   "bus_automated_yes_sigma" ,
-                             "bus_attendant_yes_mu", "bus_attendant_yes_sigma",
-                             "mode_RH_mu", "mode_RH_sigma",
-                             "RH_automated_yes_mu", "RH_automated_yes_sigma",
-                             "RH_attendant_yes_mu" , "RH_attendant_yes_sigma",
-                              "mode_sharedRH_mu" , "mode_sharedRH_sigma"  ,
-                             "sharedRH_automated_yes_mu" ,"sharedRH_automated_yes_sigma",
-                             "sharedRH_attendant_yes_mu",  "sharedRH_attendant_yes_sigma"),
+  full_join(results_mxl_weighted, by = "coefficients") %>% 
+    mutate(
+      coefficients = as.factor(coefficients),
+      coefficients = coefficients %>% fct_relevel("scalePar",
+                                                "travelTime",
+                                                "travelTime_bus", 
+                                                "travelTime_RH", 
+                                                "travelTime_sharedRH",
+                                                "mode_bus", 
+                                                "sd_mode_bus",
+                                                "bus_automated_yes",
+                                                "bus_attendant_yes", 
+                                                "mode_RH", 
+                                                "sd_mode_RH",
+                                                "RH_automated_yes", 
+                                                "RH_attendant_yes" , 
+                                                "mode_sharedRH" , 
+                                                "sd_mode_sharedRH",
+                                                "sharedRH_automated_yes",
+                                                "sharedRH_attendant_yes"))
+
+summary_final <- summary_final %>% 
+    mutate(
     coefficients = recode_factor(coefficients,
-                       "lambda" = "Lambda",
-                       "travelTime_mu" = "Travel time",
-                      "mode_bus_mu" = "Bus",
-                       "mode_RH_mu" = "Ride-hailing (RH)",
-                      "mode_sharedRH_mu" = "Shared RH",
-                     "bus_automated_yes_mu" = "Bus - Automated",
-                     "bus_attendant_yes_mu" = "Bus - Attendant present",
-                     "RH_automated_yes_mu" = "RH - Automated",
-                     "RH_attendant_yes_mu" = "RH - Attendant present",
-                    "sharedRH_automated_yes_mu" = "Shared RH - Automated",
-                    "sharedRH_attendant_yes_mu" = "Shared RH - Attendant present")
+                       "scalePar" = "Scale Parameter",
+                       "travelTime" = "Travel time",
+                       "travelTime_bus" = "Bus travel time",
+                       "travelTime_RH" = "RH travel time",
+                       "travelTime_sharedRH" = "Shared RH travel time",
+                      "mode_bus" = "Bus",
+                       "mode_RH" = "Ride-hailing (RH)",
+                      "mode_sharedRH" = "Shared RH",
+                     "bus_automated_yes" = "Bus - Automated",
+                     "bus_attendant_yes" = "Bus - Attendant present",
+                     "RH_automated_yes" = "RH - Automated",
+                     "RH_attendant_yes" = "RH - Attendant present",
+                    "sharedRH_automated_yes" = "Shared RH - Automated",
+                    "sharedRH_attendant_yes" = "Shared RH - Attendant present")
     ) %>%
   arrange(coefficients)
 
@@ -493,20 +507,10 @@ names(summary_final) <- c("coefficient", "MXL", "MXL_weighted")
 #FLEXTABLE
 summary1 <- flextable(as.data.frame(summary_final))
 theme_vanilla(summary1)
-#rename header rows based on models
-# summary1 <- add_header_row(
-#   summary1, values = c("", "MNL", "MXL", "MNL_Female", "MNL_Male")
-#   # ,
-#   # colwidths = c(1,2,2,2,2,2)
-#   )
-summary1<- autofit(summary1)
-summary1 <- add_footer_lines(summary1, values = "Signif. codes:  '***' = 0.001, '**' = 0.01, '*' = 0.05, '.' = 0.1, ' ' = 1")
-summary1 <- align(summary1, align = "right", part = "body")
-print(summary1, preview = "docx")
 
 save_as_docx(
   "Coef_Table" = summary1,
-  path = here::here('Coefficient_Table_AppendixB.docx'))
+  path = here::here("charts", 'Appendix_Coefficient_Table.docx'))
 
 ```
 
