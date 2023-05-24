@@ -240,7 +240,7 @@ data_filtered <- data_filtered %>%
 
 dim(data_filtered)
 
-write_csv(data_filtered, here::here('data_processed', 'finalSample_info.csv'))
+write_csv(data_filtered, here::here('data_processed', 'finalSample.csv'))
 
 # Merge responses with survey designs to get choiceData 
 

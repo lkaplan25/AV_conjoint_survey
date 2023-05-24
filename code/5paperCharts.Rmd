@@ -8,9 +8,8 @@ output:
 
 ```{r setup, include=FALSE, echo = FALSE}
 knitr::opts_chunk$set(fig.width=6, fig.height=4,warning=FALSE, message=FALSE)
-
+#install.packages('kableExtra')
 library(plyr)
-#library(formr)
 library(tidyverse)
 library(magrittr)
 options(dplyr.width = Inf)
@@ -28,11 +27,7 @@ library(gtsummary)
 library(knitr)
 library(flextable)
 library(kableExtra)
-library(conjointTools)
 library(logitr)
-
-
-
 
 
 plotColors = c('sienna','#e2a8a6' , 'grey60','lightsteelblue', 'steelblue')
@@ -46,20 +41,21 @@ theme_update(plot.title = element_text(
             size = base * 1.5),
            legend.position = "none")
 
-data_filtered <- read_csv(here::here('data_processed', 'data_filtered.csv'))
+finalSample <- read_csv(here::here('data_processed', 'finalSample.csv'))
 
-load(here::here("models", "mxl.RData")) # Load models
-load(here::here("models", "mxl_gender.RData")) # Load gender models
-load(here::here("models", "mnl_gender.RData"))
+# Load models
+mxl_wtp <- readRDS(here::here("models", "mxl_wtp.Rds"))
+mxl_wtp_income_low <- readRDS(here::here("models", "mxl_wtp_income_low.Rds"))
+mxl_wtp_income_high <- readRDS(here::here("models", "mxl_wtp_income_high.Rds"))
+mxl_wtp_gender_male <- readRDS(here::here("models", "mxl_wtp_gender_male.Rds"))
+mxl_wtp_gender_female <- readRDS(here::here("models", "mxl_wtp_gender_female.Rds"))
 
 ```
 
 Data of filtered sample
 ```{r demographics}
 
-data_filtered <- data_filtered %>% 
-  filter(genderGroup != "unknown") %>% 
-         #!is.na(yearOfBirth), yearOfBirth != "prefer_not_say", incomeGroup != "unknown") %>%
+finalSample <- finalSample %>% 
   mutate(
     income = case_when(
       income %in% c("under10", "inc_10to15") ~ "inc_under15",
@@ -70,32 +66,12 @@ data_filtered <- data_filtered %>%
 
 set_gtsummary_theme(theme_gtsummary_compact())
 
-ageGroups <- data_filtered %>% 
-  mutate(
-    age = 2021 - as.numeric(yearOfBirth),
-    ageGroups = case_when(
-     age <= 24 ~ "18-24",
-     (age > 24 & age <= 34) ~ "25-34",
-     (age > 34 & age <= 44) ~ "35-44",
-     (age > 44 & age <= 54) ~ "45-54",
-     (age > 54 & age <= 64) ~ "55-64",
-     (age > 64 & age <= 74) ~ "65-74",
-     (age > 74 & age <= 84) ~ "75-84",
-     age > 84 ~ "85+"
-    )
-    ) %>% 
-  select(yearOfBirth, age, ageGroups)
-  
-ageGroups  %>% 
-  gtsummary::tbl_summary(label = list(ageGroups ~ "Age"))
 
-
-
-demoSummary <- data_filtered %>% 
+demoSummary <- finalSample %>% 
   mutate(
     income = fct_relevel(income, "inc_under15", "inc_15to25", "inc_25to35", "inc_35to50", "inc_50to75", "inc_75to100", "inc_100to150", "inc_over150"),
     gender = fct_relevel(gender, "male", "female"),
-    income = recode_factor(data_filtered$income, "inc_under15" = "Less than $15,000", "inc_15to25" = "$15,000 - $24,999", "inc_25to35" = "$25,000 - $34,999", "inc_35to50" = "$35,000 - $49,999", "inc_50to75" = "$50,000 - $74,999", "inc_75to100" = "$75,000 - $99,999", "inc_100to150" = "$100,000 - $149,999", "inc_over150" = "$150,000 or more"),
+    income = recode_factor(finalSample$income, "inc_under15" = "Less than $15,000", "inc_15to25" = "$15,000 - $24,999", "inc_25to35" = "$25,000 - $34,999", "inc_35to50" = "$35,000 - $49,999", "inc_50to75" = "$50,000 - $74,999", "inc_75to100" = "$75,000 - $99,999", "inc_100to150" = "$100,000 - $149,999", "inc_over150" = "$150,000 or more"),
     gender = case_when(
       gender == "male" ~ "Male",
       gender == "female" ~ "Female",
@@ -107,8 +83,8 @@ demoSummary <- data_filtered %>%
       education == "degree_grad" ~ "Graduate or Professional Degree"
     ),
      education = fct_relevel(education, "No High school or High School", "Some College/Associate's", "Bachelor's degree", "Graduate or Professional Degree"),
-    bankAccountAccess = recode_factor(data_filtered$bankAccountAccess, no = "No", yes = "Yes", nonreg = "Doesn't use regularly"),
-    phoneAccess = recode_factor(data_filtered$phoneAccess, noPhone = "No cellphone", nonSmartphone = "No smartphone", smartphone = "Has smartphone"),
+    bankAccountAccess = recode_factor(finalSample$bankAccountAccess, no = "No", yes = "Yes", nonreg = "Doesn't use regularly"),
+    phoneAccess = recode_factor(finalSample$phoneAccess, noPhone = "No cellphone", nonSmartphone = "No smartphone", smartphone = "Has smartphone"),
     disability = case_when(
       disability %in% c("none", "intellectual, none", "physical, none", "physical, visual, intellectual, none", "visual, none") ~ "None",
       disability == "intellectual" ~ "Intellectual",
@@ -131,7 +107,7 @@ demoSummary <- data_filtered %>%
     ) %>% 
   select(gender, ageGroups, income, education, bankAccountAccess, phoneAccess, disability) 
 
-demoSummary %>% 
+demoSummary <- demoSummary %>% 
   gtsummary::tbl_summary(label = list(gender ~ "Gender", ageGroups ~ "Age", income ~ "Annual Household Income", education ~ "Education", bankAccountAccess ~ "Bank Account Access", phoneAccess ~ "Phone Access", disability ~ "Disability")) %>% 
   as_flex_table(
   include = everything(),
@@ -139,13 +115,16 @@ demoSummary %>%
   strip_md_bold = TRUE
 )
 
-
+save_as_docx(
+  "Demographic Table" = demoSummary,
+  path = here::here("charts", 'Demographic_Table.docx'))
 
 ```
 
 ```{r target demographics}
+# Reading in data from the 2018/2017 Regional Travel Survey
 
-target_gender <- read_csv(here::here('data_processed', 'MWCOG_genderGroups.csv')) %>% 
+target_gender <- read_csv(here::here('data_raw', 'MWCOG_genderGroups.csv')) %>% 
   filter(gender != "not_reported") 
 
 target_gender <- target_gender %>% 
@@ -162,7 +141,7 @@ target_gender %>%
   kable()
 
 
-target_ageGroup <- read_csv(here::here('data_processed', 'MWCOG_ageGroup.csv')) %>% 
+target_ageGroup <- read_csv(here::here('data_raw', 'MWCOG_ageGroup.csv')) %>% 
   filter(ageGroup %in% c("age_18to24", "age_25to34", "age_35to44","age_45to54","age_55to64","age_65to74", "age_75to84","age_over85")) 
   
 target_ageGroup <- target_ageGroup %>% 
@@ -174,7 +153,7 @@ target_ageGroup <- target_ageGroup %>%
 target_ageGroup %>% 
   kable()
          
-target_income <- read_csv(here::here('data_processed', 'MWCOG_income.csv')) %>% 
+target_income <- read_csv(here::here('data_raw', 'MWCOG_income.csv')) %>% 
   mutate(
     percent_income = round(percent,1)
   ) %>%
@@ -182,6 +161,22 @@ target_income <- read_csv(here::here('data_processed', 'MWCOG_income.csv')) %>%
 
 target_income %>% 
   kable()
+
+```
+
+```{r gtSummary table}
+
+# Make individual tables
+t1 <- tbl_summary(mxl_wtp)
+t2 <- tbl_regression(mxl_wtp_gender_male)
+t3 <- tbl_regression(mxl_wtp_gender_female)
+t4 <- tbl_regression(mxl_wtp_income_high)
+t5 <- tbl_regression(mxl_wtp_income_low)
+
+tbl_merge(
+  tbls = list(t1, t2, t3, t4, t5, t6),
+  tab_spanner = c("**MXL**", "**MXL Male**", "**MXL Female**", "**MXL Mid/High Income**", "**MXL Low Income**")
+)
 
 ```
 
@@ -205,9 +200,9 @@ make_coef_table <- function(model) {
         prob > 0.05 & prob <= 0.1, '.', '   ')))),
       sig2 = ifelse(
         prob <= 0.001,'***', ifelse(
-          prob > 0.001 & prob <= 0.01, '&nbsp;**', ifelse(
-            prob > 0.01 & prob <= 0.05, '&nbsp;&nbsp;*', ifelse(
-              prob > 0.05 & prob <= 0.1, '&nbsp;&nbsp;&nbsp;.', "&nbsp;&nbsp;&nbsp;&nbsp;"))))
+          prob > 0.001 & prob <= 0.01, ' **', ifelse(
+            prob > 0.01 & prob <= 0.05, '  *', ifelse(
+              prob > 0.05 & prob <= 0.1, '   .', "    ;"))))
     ) %>%
     mutate(
       Estimate = sprintf("%.3f", Estimate),
@@ -228,53 +223,64 @@ make_coef_table <- function(model) {
 ```{r modelResults}
 # Make coefficient tables
 results_mxl <- make_coef_table(mxl_wtp)
-results_mxl_M <- make_coef_table(mxl_wtp_A)
-results_mxl_F <- make_coef_table(mxl_wtp_B)
+results_mxl_M <- make_coef_table(mxl_wtp_gender_male)
+results_mxl_F <- make_coef_table(mxl_wtp_gender_female)
+results_mxl_income_low <- make_coef_table(mxl_wtp_income_low)
+results_mxl_income_high <- make_coef_table(mxl_wtp_income_high)
 
 #join
 summary_final <- results_mxl %>%
   full_join(results_mxl_M, by = "coefficients") %>%
   full_join(results_mxl_F, by = "coefficients")  %>%
+  full_join(results_mxl_income_high, by = "coefficients") %>% 
+  full_join(results_mxl_income_low, by = "coefficients") %>% 
   mutate(
     coefficients = as.factor(coefficients),
-    coefficients = coefficients %>% fct_relevel("lambda",
-                             "travelTime_mu", "travelTime_sigma" ,
-                             "mode_bus_mu", "mode_bus_sigma",
-                             "bus_automated_yes_mu",   "bus_automated_yes_sigma" ,
-                             "bus_attendant_yes_mu", "bus_attendant_yes_sigma",
-                             "mode_RH_mu", "mode_RH_sigma",
-                             "RH_automated_yes_mu", "RH_automated_yes_sigma",
-                             "RH_attendant_yes_mu" , "RH_attendant_yes_sigma",
-                              "mode_sharedRH_mu" , "mode_sharedRH_sigma"  ,
-                             "sharedRH_automated_yes_mu" ,"sharedRH_automated_yes_sigma",
-                             "sharedRH_attendant_yes_mu",  "sharedRH_attendant_yes_sigma"),
+    coefficients = coefficients %>% fct_relevel("scalePar",
+                                                "travelTime",
+                                                "travelTime_bus", 
+                                                "travelTime_RH", 
+                                                "travelTime_sharedRH",
+                                                "mode_bus", 
+                                                "sd_mode_bus",
+                                                "bus_automated_yes",
+                                                "bus_attendant_yes", 
+                                                "mode_RH", 
+                                                "sd_mode_RH",
+                                                "RH_automated_yes", 
+                                                "RH_attendant_yes" , 
+                                                "mode_sharedRH" , 
+                                                "sd_mode_sharedRH",
+                                                "sharedRH_automated_yes",
+                                                "sharedRH_attendant_yes"))
+
+summary_final <- summary_final %>% 
+    mutate(
     coefficients = recode_factor(coefficients,
-                       "lambda" = "Lambda",
-                       "travelTime_mu" = "Travel time",
-                      "mode_bus_mu" = "Bus",
-                       "mode_RH_mu" = "Ride-hailing (RH)",
-                      "mode_sharedRH_mu" = "Shared RH",
-                     "bus_automated_yes_mu" = "Bus - Automated",
-                     "bus_attendant_yes_mu" = "Bus - Attendant present",
-                     "RH_automated_yes_mu" = "RH - Automated",
-                     "RH_attendant_yes_mu" = "RH - Attendant present",
-                    "sharedRH_automated_yes_mu" = "Shared RH - Automated",
-                    "sharedRH_attendant_yes_mu" = "Shared RH - Attendant present")
+                       "scalePar" = "Scale Parameter",
+                       "travelTime" = "Travel time",
+                       "travelTime_bus" = "Bus travel time",
+                       "travelTime_RH" = "RH travel time",
+                       "travelTime_sharedRH" = "Shared RH travel time",
+                      "mode_bus" = "Bus",
+                       "mode_RH" = "Ride-hailing (RH)",
+                      "mode_sharedRH" = "Shared RH",
+                     "bus_automated_yes" = "Bus - Automated",
+                     "bus_attendant_yes" = "Bus - Attendant present",
+                     "RH_automated_yes" = "RH - Automated",
+                     "RH_attendant_yes" = "RH - Attendant present",
+                    "sharedRH_automated_yes" = "Shared RH - Automated",
+                    "sharedRH_attendant_yes" = "Shared RH - Attendant present")
     ) %>%
   arrange(coefficients)
 
-names(summary_final) <- c("coefficient", "MXL", "MXL_male", "MXL_female")
+names(summary_final) <- c("coefficient", "MXL", "MXL_male", "MXL_female", "MXL_mid/high income", "MXL_low income")
 
 
 #FLEXTABLE
 summary1 <- flextable(as.data.frame(summary_final))
 theme_vanilla(summary1)
-#rename header rows based on models
-# summary1 <- add_header_row(
-#   summary1, values = c("", "MNL", "MXL", "MNL_Female", "MNL_Male")
-#   # ,
-#   # colwidths = c(1,2,2,2,2,2)
-#   )
+
 summary1<- autofit(summary1)
 summary1 <- add_footer_lines(summary1, values = "Signif. codes:  '***' = 0.001, '**' = 0.01, '*' = 0.05, '.' = 0.1, ' ' = 1")
 summary1 <- align(summary1, align = "right", part = "body")
@@ -282,15 +288,7 @@ print(summary1, preview = "docx")
 
 save_as_docx(
   "Coef_Table" = summary1,
-  path = here::here('Coefficient_Table.docx'))
-
-# table1 <- kable(summary1, align = "r", escape = FALSE) %>%
-#    kable_styling() %>%
-#    add_footnote("Signif. codes:  '***' = 0.001, '**' = 0.01, '*' = 0.05, '.' = 0.1, ' ' = 1", notation="number")
-# 
-# table1
-
-
+  path = here::here("charts", 'Coefficient_Table.docx'))
 
 ```
 
@@ -298,30 +296,36 @@ save_as_docx(
 
 
 modelResults_mxl <- round(summary(mxl_wtp)$statTable, 1)
-modelResults_mxl_M <- round(summary(mxl_wtp_A)$statTable, 1)
-modelResults_mxl_F <- round(summary(mxl_wtp_B)$statTable, 1)
+modelResults_mxl_M <- round(summary(mxl_wtp_gender_male)$statTable, 1)
+modelResults_mxl_F <- round(summary(mxl_wtp_gender_female)$statTable, 1)
+modelResults_mxl_income_high <- round(summary(mxl_wtp_income_high)$statTable, 1)
+modelResults_mxl_income_low <- round(summary(mxl_wtp_income_low)$statTable, 1)
 
 modelResults_mxl$par <- row.names(modelResults_mxl)
 modelResults_mxl_M$par <- row.names(modelResults_mxl_M)
 modelResults_mxl_F$par <- row.names(modelResults_mxl_F)
+modelResults_mxl_income_high$par <- row.names(modelResults_mxl_income_high)
+modelResults_mxl_income_low$par <- row.names(modelResults_mxl_income_low)
 
 modelResults_full <- modelResults_mxl %>%
   left_join(modelResults_mxl_M, by = "par") %>%
-  left_join(modelResults_mxl_F, by = "par") 
+  left_join(modelResults_mxl_F, by = "par") %>% 
+  left_join(modelResults_mxl_income_high, by  = "par") %>% 
+  left_join(modelResults_mxl_income_low, by = "par")
 
 
-names(modelResults_full) <- c("MXL", "Attribute", "MXL_Male", "MXL_Female")
+names(modelResults_full) <- c("MXL", "Attribute", "MXL_Male", "MXL_Female", "MXL_Mid/High Income", "MXL_Low Income")
 
 modelResults_full <- modelResults_full %>% 
-  select("Attribute", "MXL", "MXL_Male", "MXL_Female")
+  select("Attribute", "MXL", "MXL_Male", "MXL_Female", "MXL_Mid/High Income", "MXL_Low Income")
 
 summary2 <- flextable(as.data.frame(modelResults_full))
 
 theme_vanilla(summary2)
-summary1 <- align(summary1, align = "right", part = "body")
 
-print(summary2, preview = "docx")
-
+save_as_docx(
+  "Model Performance" = summary2,
+  path = here::here("charts", 'Model_Performance.docx'))
 
 ```
 
