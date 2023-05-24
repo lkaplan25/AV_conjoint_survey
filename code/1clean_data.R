@@ -6,11 +6,11 @@ source(here::here('code', '0setup.R'))
 # As a feature of the formR platform, the survey had to be divided into multiple parts which
 # resulted in multiple files containing the survey responses.
 
-raw_data_start_path <- read_csv(here("data_raw", "AV_formr_conjoint_start_v3.csv"))
-raw_data_P1 <- read_csv(here("data_raw", "AV_formr_conjoint_P1_v3.csv"))
-raw_data_P2 <- read_csv(here("data_raw", "AV_formr_conjoint_P2_v3.csv"))
-raw_data_P3 <- read_csv(here("data_raw", "AV_formr_conjoint_P3_v3.csv"))
-raw_data_P4 <- read_csv(here("data_raw", "AV_formr_conjoint_P4_v3.csv"))
+raw_data_start_path <- read_csv(here::here("data_raw", "AV_formr_conjoint_start_v3.csv"))
+raw_data_P1 <- read_csv(here::here("data_raw", "AV_formr_conjoint_P1_v3.csv"))
+raw_data_P2 <- read_csv(here::here("data_raw", "AV_formr_conjoint_P2_v3.csv"))
+raw_data_P3 <- read_csv(here::here("data_raw", "AV_formr_conjoint_P3_v3.csv"))
+raw_data_P4 <- read_csv(here::here("data_raw", "AV_formr_conjoint_P4_v3.csv"))
 
 #Format start survey
 raw_data_start <- raw_data_start_path %>%
@@ -171,9 +171,7 @@ data <- data %>%
 dim(data)
 
 
-
 #5 - Remove too short conjoint question times
-
 
 data <- data %>%
   gather(
@@ -235,12 +233,14 @@ survey <- read_csv(here::here('data_raw', 'survey.csv'))
 data_filtered <- data_filtered %>% 
   select(session, respondentID, id, cbc1, cbc2, cbc3, cbc4, cbc5, cbc6, cbc7, cbc8, everything())
 
-# Remove participants who are missing gender info 
+# Remove participants who are missing gender and income info 
 
 data_filtered <- data_filtered %>%
   filter(genderGroup != "unknown", incomeGroup != "unknown") 
 
 dim(data_filtered)
+
+write_csv(data_filtered, here::here('data_processed', 'finalSample_info.csv'))
 
 # Merge responses with survey designs to get choiceData 
 
