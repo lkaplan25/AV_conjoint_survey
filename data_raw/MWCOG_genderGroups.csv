@@ -1,0 +1,4 @@
+gender,frequency,wgtFrequency,stdev_wgtFrequency,percent,sterror_percent,lowerci_95,upperci_95
+not_reported,6,1648,881.96293,0.0231,0.0124,0,0.0474
+female,20630,3728091,28986,52.3351,0.3351,51.6783,52.9918
+male,18599,3393768,28196,47.6418,0.3351,46.9851,48.2985
