@@ -128,7 +128,7 @@ plot_mode_automated_attendant_All <- df_mode %>%
 plot_mode_automated_attendant_All
 
 ggsave(
-  filename = here('figs', 'wtp_mode.png'),
+  filename = here::here('figs', 'wtp_mode.png'),
   plot = plot_mode_automated_attendant_All,
   width = 7, height = 4
 )
@@ -290,7 +290,7 @@ ggsave(
 
 # Create full df of scenarios 
 
-df <- read_csv(here('sims', 'scenarios.csv')) %>% 
+df <- read_csv(here::here('sims', 'scenarios.csv')) %>% 
   mutate(
     price_reduction = 1
   )
