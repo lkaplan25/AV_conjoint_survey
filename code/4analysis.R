@@ -121,7 +121,7 @@ plot_mode_automated_attendant_All <- df_mode %>%
   labs(
     y = NULL, 
     x = 'Willingness to Pay ($1) relative to rail',
-    title = "AV preferences shift with addition of an attendant",
+    title = "UNWEIGHTED - AV preferences shift with addition of an attendant",
     subtitle = "Automation alone does not drastically alter mode preferences"
   ) +
   geom_vline(xintercept = 0, linetype = "dashed") +
@@ -169,7 +169,7 @@ plot_mode_automated_attendant_All <- df_mode %>%
   labs(
     y = NULL, 
     x = 'Willingness to Pay ($1) relative to rail',
-    title = "AV preferences shift with addition of an attendant",
+    title = "WEIGHTED - AV preferences shift with addition of an attendant",
     subtitle = "Automation alone does not drastically alter mode preferences"
   ) +
   geom_vline(xintercept = 0, linetype = "dashed") +
