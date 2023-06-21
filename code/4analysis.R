@@ -127,15 +127,30 @@ wtp_ci
 
 # Separate coefficient CIs by attribute 
 wtp_ci$par <- row.names(wtp_ci)
-df_mode <- get_df_mode(wtp_ci)
+df_mode_short <- get_df_mode(wtp_ci)
+
+#### Long Trip-----------------
+
+# Computing the combinations of WTP draws
+wtp_draws <- compute_wtp_vars_45(wtp_draws)
+wtp_ci <- ci(wtp_draws)
+wtp_ci <- wtp_ci[-1,] # Drop lambda (we won't plot this)
+wtp_ci
+
+# Plot results
+
+# Separate coefficient CIs by attribute 
+wtp_ci$par <- row.names(wtp_ci)
+df_mode_long <- get_df_mode(wtp_ci)
+
 
 # Get upper and lower bounds (plots should have the same x-axis)
-xmin <- floor(min(df_mode$lower))
-xmax <- ceiling(max(df_mode$upper))
+xmin <- floor(min(c(df_mode_short$lower, df_mode_long$lower)))
+xmax <- ceiling(max(c(df_mode_short$upper, df_mode_long$upper)))
 
 # Comparing all mode options 
 
-plot_mode_shortTrip <- df_mode %>% 
+plot_mode_shortTrip <- df_mode_short %>% 
   ggplot(aes(y = par, x = mean, xmin = lower, xmax = upper)) +
   geom_point(size = 1.5, color = "navyblue") +
   geom_errorbar(width = 0.3, color = 'navyblue') +
@@ -152,27 +167,10 @@ plot_mode_shortTrip <- df_mode %>%
 
 plot_mode_shortTrip
 
-#### Long Trip-----------------
-
-# Computing the combinations of WTP draws
-wtp_draws <- compute_wtp_vars_45(wtp_draws)
-wtp_ci <- ci(wtp_draws)
-wtp_ci <- wtp_ci[-1,] # Drop lambda (we won't plot this)
-wtp_ci
-
-# Plot results
-
-# Separate coefficient CIs by attribute 
-wtp_ci$par <- row.names(wtp_ci)
-df_mode <- get_df_mode(wtp_ci)
-
-# Get upper and lower bounds (plots should have the same x-axis)
-xmin <- floor(min(df_mode$lower))
-xmax <- ceiling(max(df_mode$upper))
 
 # Comparing all mode options 
 
-plot_mode_longTrip <- df_mode %>% 
+plot_mode_longTrip <- df_mode_long %>% 
   ggplot(aes(y = par, x = mean, xmin = lower, xmax = upper)) +
   geom_point(size = 1.5, color = "navyblue") +
   geom_errorbar(width = 0.3, color = 'navyblue') +
@@ -188,6 +186,12 @@ plot_mode_longTrip <- df_mode %>%
   plot_theme()
 
 plot_mode_longTrip
+
+plot_modes <- plot_grid(
+  plot_mode_shortTrip,
+  plot_mode_longTrip,
+  nrow = 1, ncol = 2
+)
 
 #ggsave(
 #   filename = here::here('figs', 'wtp_mode_longTrip.png'),
