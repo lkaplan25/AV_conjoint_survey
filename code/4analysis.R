@@ -96,7 +96,7 @@ plot_theme <- function() {
   return(
     theme_bw() + 
     theme(
-      text = element_text(size=14, family = "Roboto Condensed", face = "bold"),
+      text = element_text(size=10, family = "Roboto Condensed", face = "bold"),
       strip.text.y = element_text(angle = 0),
       axis.title.y = element_blank(),
       axis.title.x = element_text(size = 12),
@@ -159,8 +159,7 @@ plot_mode_shortTrip <- df_mode_short %>%
   labs(
     y = NULL, 
     x = 'Willingness to Pay ($1) relative to rail',
-    title = "UNWEIGHTED 15min - AV preferences shift with addition of an attendant",
-    subtitle = "Automation alone does not drastically alter mode preferences"
+    title = "Short Trip (15min)"
   ) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   plot_theme()
@@ -179,25 +178,42 @@ plot_mode_longTrip <- df_mode_long %>%
   labs(
     y = NULL, 
     x = 'Willingness to Pay ($1) relative to rail',
-    title = "UNWEIGHTED 45min - AV preferences shift with addition of an attendant",
-    subtitle = "Automation alone does not drastically alter mode preferences"
+    title = "Long Trip (45min)"
   ) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   plot_theme()
 
 plot_mode_longTrip
 
-plot_modes <- plot_grid(
+plot_row <- plot_grid(
   plot_mode_shortTrip,
   plot_mode_longTrip,
-  nrow = 1, ncol = 2
+  nrow = 1
 )
 
-#ggsave(
-#   filename = here::here('figs', 'wtp_mode_longTrip.png'),
-#   plot = plot_mode_automated_attendant_All,
-#   width = 7, height = 4
-# )
+title <- ggdraw() + 
+  draw_label("AV preferences shift with addition of an attendant", 
+             hjust = 0.5,
+             fontfamily = "Roboto Condensed",
+             fontface = "bold", 
+             size = 14)
+
+subtitle <- ggdraw() + 
+  draw_label("Automation alone does not drastically alter mode preferences", 
+             hjust = 0.5,
+             fontfamily = "Roboto Condensed",
+             fontface = "plain",
+             size = 12
+             )
+
+plot_combined <- plot_grid(title,subtitle, plot_modes, ncol=1, rel_heights=c(0.1, 0.08, 1)) 
+plot_combined
+
+ggsave(
+  filename = here::here('figs', 'wtp_mode.png'),
+  plot = plot_combined,
+  width = 14, height = 4.5
+)
 
 ## Subgroup analysis-------------
 
