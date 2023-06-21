@@ -232,14 +232,15 @@ coefs_B <- coef(mxl_wtp_B)
 covariance_B <- vcov(mxl_wtp_B)
 coef_draws_B <- as.data.frame(MASS::mvrnorm(10^4, coefs_B, covariance_B))
 
+#### Short Trip ----------
 # Computing the combinations of WTP draws
-coef_draws_A <- compute_wtp_vars(coef_draws_A)
+coef_draws_A <- compute_wtp_vars_15(coef_draws_A)
 wtp_ci_A <- ci(coef_draws_A)
 wtp_ci_A <- wtp_ci_A[-1,] 
 wtp_ci_A$group <- "Male"
 wtp_ci_A$par <- row.names(wtp_ci_A)
 
-coef_draws_B <- compute_wtp_vars(coef_draws_B)
+coef_draws_B <- compute_wtp_vars_15(coef_draws_B)
 wtp_ci_B <- ci(coef_draws_B)
 wtp_ci_B <- wtp_ci_B[-1,] 
 wtp_ci_B$group <- "Female"
@@ -251,17 +252,40 @@ wtp_groups  <-  rbind(wtp_ci_A, wtp_ci_B)
 
 # Plot results
 
-wtp_mode <- get_df_mode(wtp_groups)
+wtp_mode_short <- get_df_mode(wtp_groups)
+
+
+#### Long Trip --------
+# Computing the combinations of WTP draws
+coef_draws_A <- compute_wtp_vars_45(coef_draws_A)
+wtp_ci_A <- ci(coef_draws_A)
+wtp_ci_A <- wtp_ci_A[-1,] 
+wtp_ci_A$group <- "Male"
+wtp_ci_A$par <- row.names(wtp_ci_A)
+
+coef_draws_B <- compute_wtp_vars_45(coef_draws_B)
+wtp_ci_B <- ci(coef_draws_B)
+wtp_ci_B <- wtp_ci_B[-1,] 
+wtp_ci_B$group <- "Female"
+wtp_ci_B$par <- row.names(wtp_ci_B)
+
+# Rejoin data frames
+
+wtp_groups  <-  rbind(wtp_ci_A, wtp_ci_B) 
+
+# Plot results
+
+wtp_mode_long <- get_df_mode(wtp_groups)
 
 # Get upper and lower bounds (plots should have the same x-axis)
-xmin <- floor(min(wtp_mode$lower))
-xmax <- ceiling(max(wtp_mode$upper))
+xmin <- floor(min(c(wtp_mode_short$lower, wtp_mode_long$lower)))
+xmax <- ceiling(max(c(wtp_mode_short$upper, wtp_mode_long$upper)))
 
 # Plot the WTP for each mode *with 95% CI*
 
 plotColors = c("#F16814", "#3690BF")
 
-plot_mode_automated_attendant_gender <- wtp_mode %>% 
+plot_mode_gender_shortTrip <- wtp_mode_short %>% 
   ggplot(
     aes(
       y = par, x = mean, xmin = lower, xmax = upper,  
@@ -276,20 +300,60 @@ plot_mode_automated_attendant_gender <- wtp_mode %>%
   labs(
     y = NULL, 
     x = 'Willingness to Pay ($1) relative to rail',
-    subtitle = "Automation + attendant changes willingness to pay more for men than women"
+    subtitle = "Short Trip"
   ) +
     geom_vline(xintercept = 0, linetype = "dashed") +
-  plot_theme() 
+  plot_theme() +
+  theme(legend.position="bottom")
   
-plot_mode_automated_attendant_gender
+plot_mode_gender_shortTrip
 
-# Save plot 
+plot_mode_gender_longTrip <- wtp_mode_long %>% 
+  ggplot(
+    aes(
+      y = par, x = mean, xmin = lower, xmax = upper,  
+      group = group, color = group
+    )
+  ) +
+  geom_point(size = 1.5, position = position_dodge(width = .5)) +
+  geom_errorbar(width = 0.5, position = position_dodge(width = .5)) +
+  facet_grid(mode~., scales = "free_x", space = "free") +
+  scale_x_continuous(limits = c(xmin, xmax)) +
+  scale_color_manual(values = plotColors) +
+  labs(
+    y = NULL, 
+    x = 'Willingness to Pay ($1) relative to rail',
+    subtitle = "Long Trip"
+  ) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  plot_theme() +
+  theme(legend.position="bottom")
+
+plot_mode_gender_longTrip
+
+
+plot_gender <- plot_grid(
+  plot_mode_gender_shortTrip,
+  plot_mode_gender_longTrip,
+  nrow = 1
+)
+
+title <- ggdraw() + 
+  draw_label("Men willing to pay more than women for automation & attendant", 
+             hjust = 0.5,
+             fontfamily = "Roboto Condensed",
+             fontface = "bold", 
+             size = 14)
+
+plot_combined <- plot_grid(title, plot_gender, ncol=1, rel_heights=c(0.1, 1)) 
+plot_combined
 
 ggsave(
-  filename = here::here('figs', 'mxl_wtp_gender.png'),
-  plot = plot_mode_automated_attendant_gender,
-  width = 7, height = 4
+  filename = here::here('figs', 'wtp_mode_gender.png'),
+  plot = plot_combined,
+  width = 14, height = 4.5
 )
+
 
 ### Income---------
 
@@ -498,7 +562,6 @@ probs_mxl_wtp_income_low <- probs_mxl_wtp_income_low %>%
   )
 
 
-#--------------------------
 # Bump chart
 
 get_scenario <- function(probs_model, scenario) {
