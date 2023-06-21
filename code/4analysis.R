@@ -158,7 +158,7 @@ plot_mode_shortTrip <- df_mode_short %>%
   scale_x_continuous(limits = c(xmin, xmax)) +
   labs(
     y = NULL, 
-    x = 'Willingness to Pay ($1) relative to rail',
+    x = NULL,
     title = "Short Trip (15min)"
   ) +
   geom_vline(xintercept = 0, linetype = "dashed") +
@@ -185,10 +185,10 @@ plot_mode_longTrip <- df_mode_long %>%
 
 plot_mode_longTrip
 
-plot_row <- plot_grid(
+plot_modes <- plot_grid(
   plot_mode_shortTrip,
   plot_mode_longTrip,
-  nrow = 1
+  nrow = 2
 )
 
 title <- ggdraw() + 
@@ -196,7 +196,7 @@ title <- ggdraw() +
              hjust = 0.5,
              fontfamily = "Roboto Condensed",
              fontface = "bold", 
-             size = 14)
+             size = 16)
 
 subtitle <- ggdraw() + 
   draw_label("Automation alone does not drastically alter mode preferences", 
@@ -206,13 +206,13 @@ subtitle <- ggdraw() +
              size = 12
              )
 
-plot_combined <- plot_grid(title,subtitle, plot_modes, ncol=1, rel_heights=c(0.1, 0.08, 1)) 
+plot_combined <- plot_grid(title,subtitle, plot_modes, ncol=1, rel_heights=c(0.09, 0.08, 1)) 
 plot_combined
 
 ggsave(
   filename = here::here('figs', 'wtp_mode.png'),
   plot = plot_combined,
-  width = 14, height = 4.5
+  width = 7, height = 9
 )
 
 ## Subgroup analysis-------------
@@ -299,12 +299,11 @@ plot_mode_gender_shortTrip <- wtp_mode_short %>%
   scale_color_manual(values = plotColors) +
   labs(
     y = NULL, 
-    x = 'Willingness to Pay ($1) relative to rail',
+    x = NULL,
     subtitle = "Short Trip"
   ) +
     geom_vline(xintercept = 0, linetype = "dashed") +
-  plot_theme() +
-  theme(legend.position="bottom")
+  plot_theme() 
   
 plot_mode_gender_shortTrip
 
@@ -335,7 +334,7 @@ plot_mode_gender_longTrip
 plot_gender <- plot_grid(
   plot_mode_gender_shortTrip,
   plot_mode_gender_longTrip,
-  nrow = 1
+  nrow = 2
 )
 
 title <- ggdraw() + 
@@ -351,7 +350,7 @@ plot_combined
 ggsave(
   filename = here::here('figs', 'wtp_mode_gender.png'),
   plot = plot_combined,
-  width = 14, height = 4.5
+  width = 7, height = 9
 )
 
 
