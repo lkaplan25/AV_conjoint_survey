@@ -199,55 +199,6 @@ plot_modes <- plot_grid(
 #   width = 7, height = 4
 # )
 
-### Weighted Model----------------------------------------------------------
-
-# Estimate WTP in WTP space model:
-coefs <- coef(mxl_wtp_weighted)
-covariance <- vcov(mxl_wtp_weighted)
-wtp_draws <- as.data.frame(MASS::mvrnorm(10^4, coefs, covariance))
-
-# Computing the combinations of WTP draws
-wtp_draws <- compute_wtp_vars(wtp_draws)
-wtp_ci <- ci(wtp_draws)
-wtp_ci <- wtp_ci[-1,] # Drop lambda (we won't plot this)
-wtp_ci
-
-# Plot results
-
-# Separate coefficient CIs by attribute 
-wtp_ci$par <- row.names(wtp_ci)
-df_mode <- get_df_mode(wtp_ci)
-
-# Get upper and lower bounds (plots should have the same x-axis)
-xmin <- floor(min(df_mode$lower))
-xmax <- ceiling(max(df_mode$upper))
-
-# Comparing all mode options 
-
-plot_mode_automated_attendant_All <- df_mode %>% 
-  ggplot(aes(y = par, x = mean, xmin = lower, xmax = upper)) +
-  geom_point(size = 1.5, color = "navyblue") +
-  geom_errorbar(width = 0.3, color = 'navyblue') +
-  facet_grid(mode~., scales = "free_y", space = "free") +
-  scale_x_continuous(limits = c(xmin, xmax)) +
-  labs(
-    y = NULL, 
-    x = 'Willingness to Pay ($1) relative to rail',
-    title = "WEIGHTED - AV preferences shift with addition of an attendant",
-    subtitle = "Automation alone does not drastically alter mode preferences"
-  ) +
-  geom_vline(xintercept = 0, linetype = "dashed") +
-  plot_theme()
-
-plot_mode_automated_attendant_All
-
-ggsave(
-  filename = here::here('figs', 'wtp_mode_weighted.png'),
-  plot = plot_mode_automated_attendant_All,
-  width = 7, height = 4
-)
-
-
 ## Subgroup analysis-------------
 
 ### Gender---------
