@@ -11,18 +11,39 @@ mxl_wtp_income_high <- readRDS(here::here("models", "mxl_wtp_income_high.Rds"))
 mxl_wtp_gender_male <- readRDS(here::here("models", "mxl_wtp_gender_male.Rds"))
 mxl_wtp_gender_female <- readRDS(here::here("models", "mxl_wtp_gender_female.Rds"))
                                                                                           
-# Function to compute mode variables from draws
+# Functions to compute mode variables from draws
 
-compute_wtp_vars <- function(draws) {
+compute_wtp_vars_15 <- function(draws) {
+  time <- 15 
   draws <- draws %>% 
     mutate(
-      wtp_bus_autoYes = mode_bus + bus_automated_yes,
-      wtp_bus_autoYes_attendantYes = mode_bus + bus_automated_yes + bus_attendant_yes,
-      wtp_RH_autoYes = mode_RH + RH_automated_yes,
-      wtp_RH_autoYes_attendantYes = mode_RH + RH_automated_yes + RH_attendant_yes,
-      wtp_sharedRH_autoYes = mode_sharedRH + sharedRH_automated_yes,
-      wtp_sharedRH_autoYes_attendantYes = mode_sharedRH + sharedRH_automated_yes + sharedRH_attendant_yes
+      wtp_bus = mode_bus + time*travelTime_bus,
+      wtp_bus_autoYes = mode_bus + bus_automated_yes + time*travelTime_bus,
+      wtp_bus_autoYes_attendantYes = mode_bus + bus_automated_yes + bus_attendant_yes + time*travelTime_bus,
+      wtp_RH = mode_RH + time*travelTime_RH,
+      wtp_RH_autoYes = mode_RH + RH_automated_yes + time*travelTime_RH,
+      wtp_RH_autoYes_attendantYes = mode_RH + RH_automated_yes + RH_attendant_yes + time*travelTime_RH,
+      wtp_sharedRH = mode_sharedRH + time*travelTime_sharedRH,
+      wtp_sharedRH_autoYes = mode_sharedRH + sharedRH_automated_yes + time*travelTime_sharedRH,
+      wtp_sharedRH_autoYes_attendantYes = mode_sharedRH + sharedRH_automated_yes + sharedRH_attendant_yes + time*travelTime_sharedRH
   )
+  return(draws)
+}
+
+compute_wtp_vars_45 <- function(draws) {
+  time <- 45 
+  draws <- draws %>% 
+    mutate(
+      wtp_bus = mode_bus + time*travelTime_bus,
+      wtp_bus_autoYes = mode_bus + bus_automated_yes + time*travelTime_bus,
+      wtp_bus_autoYes_attendantYes = mode_bus + bus_automated_yes + bus_attendant_yes + time*travelTime_bus,
+      wtp_RH = mode_RH + time*travelTime_RH,
+      wtp_RH_autoYes = mode_RH + RH_automated_yes + time*travelTime_RH,
+      wtp_RH_autoYes_attendantYes = mode_RH + RH_automated_yes + RH_attendant_yes + time*travelTime_RH,
+      wtp_sharedRH = mode_sharedRH + time*travelTime_sharedRH,
+      wtp_sharedRH_autoYes = mode_sharedRH + sharedRH_automated_yes + time*travelTime_sharedRH,
+      wtp_sharedRH_autoYes_attendantYes = mode_sharedRH + sharedRH_automated_yes + sharedRH_attendant_yes + time*travelTime_sharedRH
+    )
   return(draws)
 }
 
@@ -32,9 +53,9 @@ get_df_mode <- function(wtp_ci) {
   
   wtp_mode <- wtp_ci %>% 
     filter(par %in% c(
-      'mode_bus', 'wtp_bus_autoYes', 'wtp_bus_autoYes_attendantYes',
-      'mode_RH', 'wtp_RH_autoYes', 'wtp_RH_autoYes_attendantYes',
-      'mode_sharedRH','wtp_sharedRH_autoYes', 'wtp_sharedRH_autoYes_attendantYes'
+      'wtp_bus', 'wtp_bus_autoYes', 'wtp_bus_autoYes_attendantYes',
+      'wtp_RH', 'wtp_RH_autoYes', 'wtp_RH_autoYes_attendantYes',
+      'wtp_sharedRH','wtp_sharedRH_autoYes', 'wtp_sharedRH_autoYes_attendantYes'
     ))
   
   # Create data frames for plotting each attribute:
@@ -44,7 +65,7 @@ get_df_mode <- function(wtp_ci) {
   df_mode <- wtp_mode %>% 
     mutate(
       mode = case_when(
-        par %in% c('mode_bus', 'mode_RH', 'mode_sharedRH') ~ "Not\nAutomated",
+        par %in% c('wtp_bus', 'wtp_RH', 'wtp_sharedRH') ~ "Not\nAutomated",
         par %in% c(
           'wtp_bus_autoYes', 'wtp_RH_autoYes','wtp_sharedRH_autoYes'
         ) ~ "Automated,\nNo Attendant\nPresent",
@@ -55,9 +76,9 @@ get_df_mode <- function(wtp_ci) {
       ),
       par = recode_factor(
         wtp_mode$par, 
-        "mode_bus" = "Bus", 
-        "mode_RH" = "Ride-hailing", 
-        "mode_sharedRH" = "Shared Ride-hailing",
+        "wtp_bus" = "Bus", 
+        "wtp_RH" = "Ride-hailing", 
+        "wtp_sharedRH" = "Shared Ride-hailing",
         'wtp_bus_autoYes' = "Bus", 
         'wtp_RH_autoYes' = "Ride-hailing",
         'wtp_sharedRH_autoYes' = "Shared Ride-hailing",
@@ -94,8 +115,10 @@ coefs <- coef(mxl_wtp)
 covariance <- vcov(mxl_wtp)
 wtp_draws <- as.data.frame(MASS::mvrnorm(10^4, coefs, covariance))
 
+#### Short Trip-----------------
+
 # Computing the combinations of WTP draws
-wtp_draws <- compute_wtp_vars(wtp_draws)
+wtp_draws <- compute_wtp_vars_15(wtp_draws)
 wtp_ci <- ci(wtp_draws)
 wtp_ci <- wtp_ci[-1,] # Drop lambda (we won't plot this)
 wtp_ci
@@ -112,7 +135,7 @@ xmax <- ceiling(max(df_mode$upper))
 
 # Comparing all mode options 
 
-plot_mode_automated_attendant_All <- df_mode %>% 
+plot_mode_shortTrip <- df_mode %>% 
   ggplot(aes(y = par, x = mean, xmin = lower, xmax = upper)) +
   geom_point(size = 1.5, color = "navyblue") +
   geom_errorbar(width = 0.3, color = 'navyblue') +
@@ -121,19 +144,56 @@ plot_mode_automated_attendant_All <- df_mode %>%
   labs(
     y = NULL, 
     x = 'Willingness to Pay ($1) relative to rail',
-    title = "UNWEIGHTED - AV preferences shift with addition of an attendant",
+    title = "UNWEIGHTED 15min - AV preferences shift with addition of an attendant",
     subtitle = "Automation alone does not drastically alter mode preferences"
   ) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   plot_theme()
 
-plot_mode_automated_attendant_All
+plot_mode_shortTrip
 
-ggsave(
-  filename = here::here('figs', 'wtp_mode.png'),
-  plot = plot_mode_automated_attendant_All,
-  width = 7, height = 4
-)
+#### Long Trip-----------------
+
+# Computing the combinations of WTP draws
+wtp_draws <- compute_wtp_vars_45(wtp_draws)
+wtp_ci <- ci(wtp_draws)
+wtp_ci <- wtp_ci[-1,] # Drop lambda (we won't plot this)
+wtp_ci
+
+# Plot results
+
+# Separate coefficient CIs by attribute 
+wtp_ci$par <- row.names(wtp_ci)
+df_mode <- get_df_mode(wtp_ci)
+
+# Get upper and lower bounds (plots should have the same x-axis)
+xmin <- floor(min(df_mode$lower))
+xmax <- ceiling(max(df_mode$upper))
+
+# Comparing all mode options 
+
+plot_mode_longTrip <- df_mode %>% 
+  ggplot(aes(y = par, x = mean, xmin = lower, xmax = upper)) +
+  geom_point(size = 1.5, color = "navyblue") +
+  geom_errorbar(width = 0.3, color = 'navyblue') +
+  facet_grid(mode~., scales = "free_y", space = "free") +
+  scale_x_continuous(limits = c(xmin, xmax)) +
+  labs(
+    y = NULL, 
+    x = 'Willingness to Pay ($1) relative to rail',
+    title = "UNWEIGHTED 45min - AV preferences shift with addition of an attendant",
+    subtitle = "Automation alone does not drastically alter mode preferences"
+  ) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  plot_theme()
+
+plot_mode_longTrip
+
+#ggsave(
+#   filename = here::here('figs', 'wtp_mode_longTrip.png'),
+#   plot = plot_mode_automated_attendant_All,
+#   width = 7, height = 4
+# )
 
 ### Weighted Model----------------------------------------------------------
 
