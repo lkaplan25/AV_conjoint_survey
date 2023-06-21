@@ -586,7 +586,7 @@ bump_plot_theme <- function() {
 s1 <- get_scenario(probs_mxl_wtp, 1)
 
 bump_chart1 <- s1 %>% 
-  ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
+  ggplot(aes(x = label, y = predicted_prob, ymin = 0, ymax = .5, group = mode, color = mode)) +
   geom_bump(linewidth = .75) +
   #geom_ribbon(alpha = .2, color = NA) +
   geom_point(size = 2) +
@@ -599,6 +599,7 @@ bump_chart1 <- s1 %>%
   ) +
   scale_color_brewer(palette = "Set1") +
   scale_x_discrete(expand = expansion(add = c(.5, 1))) +
+  scale_y_continuous(expand = expansion(mult = c(0, .1))) +
   bump_plot_theme()
 
 bump_chart1
@@ -618,7 +619,7 @@ bump_chart2 <- s2 %>%
   mutate(
     label = fct_relevel(label, c("Status Quo", "Automated", "Automated,\n30% discount", "Automated,\nattendant\npresent", "Automated,\nattendant present,\n30% discount" ))
   ) %>% 
-  ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
+  ggplot(aes(x = label, y = predicted_prob, ymin = 0, ymax = .5, group = mode, color = mode)) +
   geom_bump(linewidth = .75) + 
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
@@ -630,6 +631,7 @@ bump_chart2 <- s2 %>%
   ) +
   scale_color_brewer(palette = "Set1") +
   scale_x_discrete(expand = expansion(add = c(.5, 1))) +
+  scale_y_continuous(expand = expansion(mult = c(0, .1))) +
   bump_plot_theme()
 
 bump_chart2
@@ -645,7 +647,7 @@ ggsave(
 s3 <- get_scenario(probs_mxl_wtp, 3)
 
 bump_chart3 <- s3 %>% 
-  ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
+  ggplot(aes(x = label, y = predicted_prob, ymin = 0, ymax = .5, group = mode, color = mode)) +
   geom_bump(linewidth = .75) + 
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
@@ -657,6 +659,7 @@ bump_chart3 <- s3 %>%
   ) +
   scale_color_brewer(palette = "Set1") +
   scale_x_discrete(expand = expansion(add = c(.5, 1))) +
+  scale_y_continuous(expand = expansion(mult = c(0, .1))) +
   bump_plot_theme()
 
 bump_chart3
@@ -673,7 +676,7 @@ ggsave(
 s4 <- get_scenario(probs_mxl_wtp_income_low, 4)
 
 bump_chart4 <- s4 %>% 
-  ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
+  ggplot(aes(x = label, y = predicted_prob, ymin = 0, ymax = .5, group = mode, color = mode)) +
   geom_bump(linewidth = .75) + 
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
@@ -685,6 +688,7 @@ bump_chart4 <- s4 %>%
   ) +
   scale_color_brewer(palette = "Set1") +
   scale_x_discrete(expand = expansion(add = c(.5, 1))) +
+  scale_y_continuous(expand = expansion(mult = c(0, .1))) +
   bump_plot_theme()
 
 bump_chart4
@@ -696,22 +700,22 @@ ggsave(
 )
 
 ## Scenario 5
-
-s5 <-  get_scenario(probs_mxl_wtp, 5)
+s5 <- get_scenario(probs_mxl_wtp_income_low, 5)
 
 bump_chart5 <- s5 %>% 
-  ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
+  ggplot(aes(x = label, y = predicted_prob, ymin = 0, ymax = .5, group = mode, color = mode)) +
   geom_bump(linewidth = .75) + 
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
-  geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) + #changed from last.points
+  geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) +
   labs(
     title = "Long Trip Scenario",
     x = NULL,
-    y = "Market Share"
+    y = NULL
   ) +
   scale_color_brewer(palette = "Set1") +
   scale_x_discrete(expand = expansion(add = c(.5, 1))) +
+  scale_y_continuous(expand = expansion(mult = c(0, .1))) +
   bump_plot_theme()
 
 bump_chart5
@@ -727,7 +731,7 @@ ggsave(
 s6 <- get_scenario(probs_mxl_wtp, 6)
 
 bump_chart6 <- s6 %>% 
-  ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
+  ggplot(aes(x = label, y = predicted_prob, ymin = 0, ymax = .5, group = mode, color = mode)) +
   geom_bump(linewidth = .75) + 
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
@@ -739,6 +743,7 @@ bump_chart6 <- s6 %>%
   ) +
   scale_color_brewer(palette = "Set1") +
   scale_x_discrete(expand = expansion(add = c(.5, 1))) +
+  scale_y_continuous(expand = expansion(mult = c(0, .1))) +
   bump_plot_theme()
 
 bump_chart6
