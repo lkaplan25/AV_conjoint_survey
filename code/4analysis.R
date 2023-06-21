@@ -846,3 +846,11 @@ low_income <- probs_mxl_wtp_income_low %>%
 
 summary(full - low_income)
 
+## Scenario outputs
+
+s1 %>% filter(label == "Status Quo") %>% select(mode, predicted_prob)
+s2 %>% filter(label == "Status Quo") %>% select(mode, predicted_prob)
+s3 %>% filter(label == "Status Quo") %>% select(mode, predicted_prob)
+s4 %>% filter(label == "Status Quo") %>% select(mode, predicted_prob)
+s5 %>% filter(label == "Status Quo") %>% select(mode, predicted_prob)
+s6 %>% filter(label == "Status Quo") %>% select(mode, predicted_prob)
