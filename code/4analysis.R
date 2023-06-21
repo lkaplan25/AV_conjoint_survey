@@ -773,7 +773,7 @@ bump_chart5 <- s5 %>%
   labs(
     title = "Long Trip Scenario",
     x = NULL,
-    y = NULL
+    y = "Market Share"
   ) +
   scale_color_brewer(palette = "Set1") +
   scale_x_discrete(expand = expansion(add = c(.5, 1))) +
