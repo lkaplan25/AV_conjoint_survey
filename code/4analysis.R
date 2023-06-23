@@ -96,11 +96,12 @@ plot_theme <- function() {
   return(
     theme_bw() + 
     theme(
-      text = element_text(size=10, family = "Roboto Condensed", face = "bold"),
+      text = element_text(size=12, family = "Roboto Condensed", face = "bold"),
       strip.text.y = element_text(angle = 0),
       axis.title.y = element_blank(),
       axis.title.x = element_text(size = 12),
-      plot.subtitle = element_text(face = "plain", size = 12),
+      plot.subtitle = element_text(face = "plain", size = 10),
+      plot.title = element_text(size = 10),
       legend.position = "none"
     )
   )
@@ -199,20 +200,21 @@ title <- ggdraw() +
              size = 16)
 
 subtitle <- ggdraw() + 
-  draw_label("Automation alone does not drastically alter mode preferences", 
+  draw_label("Automation alone does not drastically alter mode preferences\n", 
              hjust = 0.5,
              fontfamily = "Roboto Condensed",
              fontface = "plain",
-             size = 12
+             size = 14
              )
 
-plot_combined <- plot_grid(title,subtitle, plot_modes, ncol=1, rel_heights=c(0.09, 0.08, 1)) 
+plot_combined <- plot_grid(title,subtitle, plot_modes, ncol=1, rel_heights=c(0.08, 0.04, 1)) 
 plot_combined
+
 
 ggsave(
   filename = here::here('figs', 'wtp_mode.png'),
   plot = plot_combined,
-  width = 7, height = 9
+  width = 7, height = 7.5
 )
 
 ## Subgroup analysis-------------
@@ -283,8 +285,6 @@ xmax <- ceiling(max(c(wtp_mode_short$upper, wtp_mode_long$upper)))
 
 # Plot the WTP for each mode *with 95% CI*
 
-plotColors = c("#F16814", "#3690BF")
-
 plot_mode_gender_shortTrip <- wtp_mode_short %>% 
   ggplot(
     aes(
@@ -296,14 +296,14 @@ plot_mode_gender_shortTrip <- wtp_mode_short %>%
   geom_errorbar(width = 0.5, position = position_dodge(width = .5)) +
   facet_grid(mode~., scales = "free_x", space = "free") +
   scale_x_continuous(limits = c(xmin, xmax)) +
-  scale_color_manual(values = plotColors) +
   labs(
     y = NULL, 
     x = NULL,
     subtitle = "Short Trip"
   ) +
     geom_vline(xintercept = 0, linetype = "dashed") +
-  plot_theme() 
+  plot_theme() +
+  scale_color_viridis(discrete=TRUE)
   
 plot_mode_gender_shortTrip
 
@@ -318,7 +318,6 @@ plot_mode_gender_longTrip <- wtp_mode_long %>%
   geom_errorbar(width = 0.5, position = position_dodge(width = .5)) +
   facet_grid(mode~., scales = "free_x", space = "free") +
   scale_x_continuous(limits = c(xmin, xmax)) +
-  scale_color_manual(values = plotColors) +
   labs(
     y = NULL, 
     x = 'Willingness to Pay ($1) relative to rail',
@@ -326,7 +325,8 @@ plot_mode_gender_longTrip <- wtp_mode_long %>%
   ) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   plot_theme() +
-  theme(legend.position="bottom")
+  theme(legend.position="bottom") +
+  scale_color_viridis(discrete=TRUE)
 
 plot_mode_gender_longTrip
 
@@ -346,6 +346,8 @@ title <- ggdraw() +
 
 plot_combined <- plot_grid(title, plot_gender, ncol=1, rel_heights=c(0.1, 1)) 
 plot_combined
+
+colorblindr::cvd_grid(plot_mode_gender_longTrip)
 
 ggsave(
   filename = here::here('figs', 'wtp_mode_gender.png'),
@@ -420,8 +422,6 @@ xmax <- ceiling(max(c(wtp_mode_short$upper, wtp_mode_long$upper)))
 
 # Plot the WTP for each mode *with 95% CI*
 
-plotColors = c("#F16814", "#3690BF")
-
 plot_mode_income_shortTrip <- wtp_mode_short %>% 
   ggplot(
     aes(
@@ -433,14 +433,14 @@ plot_mode_income_shortTrip <- wtp_mode_short %>%
   geom_errorbar(width = 0.5, position = position_dodge(width = .5)) +
   facet_grid(mode~., scales = "free_x", space = "free") +
   scale_x_continuous(limits = c(xmin, xmax)) +
-  scale_color_manual(values = plotColors) +
   labs(
     y = NULL, 
     x = NULL,
     subtitle = "Short Trip"
   ) +
   geom_vline(xintercept = 0, linetype = "dashed") +
-  plot_theme() 
+  plot_theme() +
+  scale_color_viridis(discrete=TRUE)
 
 plot_mode_income_shortTrip
 
@@ -455,7 +455,6 @@ plot_mode_income_longTrip <- wtp_mode_long %>%
   geom_errorbar(width = 0.5, position = position_dodge(width = .5)) +
   facet_grid(mode~., scales = "free_x", space = "free") +
   scale_x_continuous(limits = c(xmin, xmax)) +
-  scale_color_manual(values = plotColors) +
   labs(
     y = NULL, 
     x = 'Willingness to Pay ($1) relative to rail',
@@ -463,7 +462,8 @@ plot_mode_income_longTrip <- wtp_mode_long %>%
   ) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   plot_theme() +
-  theme(legend.position="bottom")
+  theme(legend.position="bottom") +
+  scale_color_viridis(discrete=TRUE)
 
 plot_mode_income_longTrip
 
@@ -665,6 +665,8 @@ bump_chart1 <- s1 %>%
   bump_plot_theme()
 
 bump_chart1
+
+colorblindr::cvd_grid(bump_chart1)
 
 ggsave(
   filename = here::here('figs', 'proRailScenario.png'), 

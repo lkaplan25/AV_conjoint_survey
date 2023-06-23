@@ -2,9 +2,10 @@
 # install.packages(c(
 #     'here', 'tidyverse', 'lubridate', 'data.table', 'logitr', 'fastDummies',
 #     'directlabels', 'cowplot', 'ggbump', 'ggrepel', 'janitor', 'likert',
-#     'gtsummary', 'knitr', 'flextable', 'remotes', 'logitr', 'cbcTools'
+#     'gtsummary', 'knitr', 'flextable', 'remotes', 'logitr', 'cbcTools', 'viridis'
 # ))
 #remotes::install_github("jhelvy/maddTools")
+#remotes::install_github("clauswilke/colorblindr")
 
 # Data cleaning
 library(here)
@@ -30,6 +31,7 @@ library(likert)
 library(gtsummary)
 library(knitr)
 library(flextable)
+library(viridis)
 
 # View all columns in data frames
 options(dplyr.width = Inf)
