@@ -100,8 +100,8 @@ plot_theme <- function() {
       strip.text.y = element_text(angle = 0),
       axis.title.y = element_blank(),
       axis.title.x = element_text(size = 12),
-      plot.subtitle = element_text(face = "plain", size = 10),
-      plot.title = element_text(size = 10),
+      plot.subtitle = element_text(face = "bold", size = 10),
+      plot.title = element_text(size = 12),
       legend.position = "none"
     )
   )
@@ -325,7 +325,7 @@ plot_mode_gender_longTrip <- wtp_mode_long %>%
   ) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   plot_theme() +
-  theme(legend.position="bottom") +
+  #theme(legend.position="bottom") +
   scale_color_viridis(discrete=TRUE)
 
 plot_mode_gender_longTrip
@@ -338,21 +338,21 @@ plot_gender <- plot_grid(
 )
 
 title <- ggdraw() + 
-  draw_label("Men willing to pay more than women for automation & attendant", 
+  draw_label("Men willing to pay more than women for automation + attendant", 
              hjust = 0.5,
              fontfamily = "Roboto Condensed",
              fontface = "bold", 
              size = 14)
 
-plot_combined <- plot_grid(title, plot_gender, ncol=1, rel_heights=c(0.1, 1)) 
+plot_combined <- plot_grid(title, plot_gender, ncol=1, rel_heights=c(0.08, 1)) 
 plot_combined
 
-colorblindr::cvd_grid(plot_mode_gender_longTrip)
+#colorblindr::cvd_grid(plot_mode_gender_longTrip)
 
 ggsave(
   filename = here::here('figs', 'wtp_mode_gender.png'),
   plot = plot_combined,
-  width = 7, height = 9
+  width = 7, height = 7.5
 )
 
 
