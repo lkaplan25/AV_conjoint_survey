@@ -650,7 +650,6 @@ s1 <- get_scenario(probs_mxl_wtp, 1)
 bump_chart1 <- s1 %>% 
   ggplot(aes(x = label, y = predicted_prob, ymin = 0, ymax = .5, group = mode, color = mode)) +
   geom_bump(linewidth = .75) +
-  #geom_ribbon(alpha = .2, color = NA) +
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
   geom_dl(aes(label = mode), method = list(dl.trans(x = x + 0.2), "last.bumpup", cex = .75)) +
@@ -666,7 +665,7 @@ bump_chart1 <- s1 %>%
 
 bump_chart1
 
-colorblindr::cvd_grid(bump_chart1)
+#colorblindr::cvd_grid(bump_chart1)
 
 ggsave(
   filename = here::here('figs', 'proRailScenario.png'), 

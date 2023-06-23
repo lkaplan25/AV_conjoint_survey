@@ -599,22 +599,25 @@ scenarios <- dummy_cols(scenarios, c('mode', 'automated', 'attendant')) %>%
 
 scenarios$obsID <- rep(seq(nrow(scenarios)/4), each = 4) # Reset obsIDs
 
-# -----------------------------------------------------------------------------
+
+### Full model -----------------------------------------------------------------------------
 # For each case, simulate the market share predictions
 
-probs_mxl_wtp_weighted <- predict(
-  mxl_wtp_weighted,
+probs_mxl_wtp <- predict(
+  mxl_wtp,
   newdata = scenarios, 
   obsID = 'obsID', 
   interval = "confidence",
   returnData = "TRUE"
 ) 
 
+head(probs_mxl_wtp)
+
 plot_red <- rep(rep(seq(0, .3, by = 0.05), each = 4), 18)
 
-probs_mxl_wtp_weighted$percent_red <- plot_red
+probs_mxl_wtp$percent_red <- plot_red
 
-probs_mxl_wtp_weighted <- probs_mxl_wtp_weighted %>% 
+probs_mxl_wtp <- probs_mxl_wtp %>% 
   mutate(
     scenario_type = case_when(
       (percent_red == 0.3) ~ paste0(scenario_type, "Discount"),
@@ -636,7 +639,44 @@ probs_mxl_wtp_weighted <- probs_mxl_wtp_weighted %>%
     )
   )
 
-#--------------------------
+### Low-income model -----------------------------------------------------------------------------
+# For each case, simulate the market share predictions
+
+probs_mxl_wtp_income_low <- predict(
+  mxl_wtp_income_low,
+  newdata = scenarios, 
+  obsID = 'obsID', 
+  interval = "confidence",
+  returnData = "TRUE"
+)
+
+head(probs_mxl_wtp_income_low)
+
+probs_mxl_wtp_income_low$percent_red <- plot_red
+
+probs_mxl_wtp_income_low <- probs_mxl_wtp_income_low %>% 
+  mutate(
+    scenario_type = case_when(
+      (percent_red == 0.3) ~ paste0(scenario_type, "Discount"),
+      TRUE ~ scenario_type
+    ),
+    label = case_when(
+      scenario_type == "baseline" ~ "Status Quo",
+      scenario_type == "baselineDiscount" ~ "REMOVE",
+      scenario_type == "auto" ~  "Automated",
+      scenario_type == "autoDiscount" ~ "Automated,\n30% discount",
+      scenario_type == "autoAttendant" ~ "Automated,\nattendant\npresent",
+      scenario_type == "autoAttendantDiscount" ~ "Automated,\nattendant present,\n30% discount"
+    ),
+    mode = case_when(
+      mode == "RH" ~ "Ride-hailing",
+      mode == "rail" ~ "Rail",
+      mode == "sharedRH" ~ "Shared\nRide-hailing",
+      mode == "bus" ~ "Bus"
+    )
+  )
+
+
 # Bump chart
 
 get_scenario <- function(probs_model, scenario) {
@@ -659,7 +699,7 @@ bump_plot_theme <- function() {
 
 ## Scenario 1
 
-s1 <- get_scenario(probs_mxl_wtp_weighted, 1)
+s1 <- get_scenario(probs_mxl_wtp, 1)
 
 bump_chart1 <- s1 %>% 
   ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
@@ -674,12 +714,13 @@ bump_chart1 <- s1 %>%
   ) +
   scale_color_brewer(palette = "Set1") +
   scale_x_discrete(expand = expansion(add = c(.5, 1))) +
-  bump_plot_theme()
+  bump_plot_theme() +
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))
 
 
 ## Scenario 2 
 
-s2 <- get_scenario(probs_mxl_wtp_weighted, 2)
+s2 <- get_scenario(probs_mxl_wtp, 2)
 
 bump_chart2 <- s2 %>% 
   filter(scenario_num == 2, percent_red %in% c(0.00, 0.30), scenario_type != "baselineDiscount" ) %>% 
@@ -698,11 +739,12 @@ bump_chart2 <- s2 %>%
   ) +
   scale_color_brewer(palette = "Set1") +
   scale_x_discrete(expand = expansion(add = c(.5, 1))) +
-  bump_plot_theme()
+  bump_plot_theme() +
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))
 
 ## Scenario 3
 
-s3 <- get_scenario(probs_mxl_wtp_weighted, 3)
+s3 <- get_scenario(probs_mxl_wtp, 3)
 
 bump_chart3 <- s3 %>% 
   ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
@@ -717,12 +759,13 @@ bump_chart3 <- s3 %>%
   ) +
   scale_color_brewer(palette = "Set1") +
   scale_x_discrete(expand = expansion(add = c(.5, 1))) +
-  bump_plot_theme()
+  bump_plot_theme() +
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))
 
 
-## Scenario 4 - Trip from Lower Income Area
+## Scenario 4 - Trip from Lower Income Area using low income model
 
-s4 <- get_scenario(probs_mxl_wtp_weighted, 4)
+s4 <- get_scenario(probs_mxl_wtp_income_low, 4)
 
 bump_chart4 <- s4 %>% 
   ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
@@ -737,11 +780,12 @@ bump_chart4 <- s4 %>%
   ) +
   scale_color_brewer(palette = "Set1") +
   scale_x_discrete(expand = expansion(add = c(.5, 1))) +
-  bump_plot_theme()
+  bump_plot_theme() +
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))
 
 ## Scenario 5
 
-s5 <-  get_scenario(probs_mxl_wtp_weighted, 5)
+s5 <-  get_scenario(probs_mxl_wtp, 5)
 
 bump_chart5 <- s5 %>% 
   ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
@@ -756,12 +800,13 @@ bump_chart5 <- s5 %>%
   ) +
   scale_color_brewer(palette = "Set1") +
   scale_x_discrete(expand = expansion(add = c(.5, 1))) +
-  bump_plot_theme()
+  bump_plot_theme() +
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))
 
 
 ## Scenario 6
 
-s6 <- get_scenario(probs_mxl_wtp_weighted, 6)
+s6 <- get_scenario(probs_mxl_wtp, 6)
 
 bump_chart6 <- s6 %>% 
   ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
@@ -776,7 +821,8 @@ bump_chart6 <- s6 %>%
   ) +
   scale_color_brewer(palette = "Set1") +
   scale_x_discrete(expand = expansion(add = c(.5, 1))) +
-  bump_plot_theme()
+  bump_plot_theme() +
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))
 
 scenarioPlotAll <- plot_grid(
   bump_chart5,
