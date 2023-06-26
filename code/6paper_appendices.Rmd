@@ -697,6 +697,7 @@ bump_plot_theme <- function() {
   )
 }
 
+
 ## Scenario 1
 
 s1 <- get_scenario(probs_mxl_wtp, 1)

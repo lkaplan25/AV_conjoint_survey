@@ -648,7 +648,7 @@ bump_plot_theme <- function() {
 s1 <- get_scenario(probs_mxl_wtp, 1)
 
 bump_chart1 <- s1 %>% 
-  ggplot(aes(x = label, y = predicted_prob, ymin = 0, ymax = .5, group = mode, color = mode)) +
+  ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
   geom_bump(linewidth = .75) +
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
@@ -682,7 +682,7 @@ bump_chart2 <- s2 %>%
   mutate(
     label = fct_relevel(label, c("Status Quo", "Automated", "Automated,\n30% discount", "Automated,\nattendant\npresent", "Automated,\nattendant present,\n30% discount" ))
   ) %>% 
-  ggplot(aes(x = label, y = predicted_prob, ymin = 0, ymax = .5, group = mode, color = mode)) +
+  ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
   geom_bump(linewidth = .75) + 
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
@@ -710,7 +710,7 @@ ggsave(
 s3 <- get_scenario(probs_mxl_wtp, 3)
 
 bump_chart3 <- s3 %>% 
-  ggplot(aes(x = label, y = predicted_prob, ymin = 0, ymax = .5, group = mode, color = mode)) +
+  ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
   geom_bump(linewidth = .75) + 
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
@@ -739,7 +739,7 @@ ggsave(
 s4 <- get_scenario(probs_mxl_wtp_income_low, 4)
 
 bump_chart4 <- s4 %>% 
-  ggplot(aes(x = label, y = predicted_prob, ymin = 0, ymax = .5, group = mode, color = mode)) +
+  ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
   geom_bump(linewidth = .75) + 
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
@@ -758,7 +758,7 @@ bump_chart4
 
 ggsave(
   filename = here::here('figs', 'low_income_scenario_lowIncomeModel.png'), 
-  plot = bump_chart5, 
+  plot = bump_chart4, 
   width = 7, height = 4
 )
 
@@ -766,7 +766,7 @@ ggsave(
 s5 <- get_scenario(probs_mxl_wtp_income_low, 5)
 
 bump_chart5 <- s5 %>% 
-  ggplot(aes(x = label, y = predicted_prob, ymin = 0, ymax = .5, group = mode, color = mode)) +
+  ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
   geom_bump(linewidth = .75) + 
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
@@ -794,7 +794,7 @@ ggsave(
 s6 <- get_scenario(probs_mxl_wtp, 6)
 
 bump_chart6 <- s6 %>% 
-  ggplot(aes(x = label, y = predicted_prob, ymin = 0, ymax = .5, group = mode, color = mode)) +
+  ggplot(aes(x = label, y = predicted_prob, ymin = predicted_prob_lower, ymax = predicted_prob_upper, group = mode, color = mode)) +
   geom_bump(linewidth = .75) + 
   geom_point(size = 2) +
   #geom_errorbar(width = 0.3) +
