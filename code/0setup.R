@@ -32,6 +32,8 @@ library(gtsummary)
 library(knitr)
 library(flextable)
 library(viridis)
+library(ggstatsplot)
+library(ggtext)
 
 # View all columns in data frames
 options(dplyr.width = Inf)

@@ -3,6 +3,9 @@
 # Load libraries and settings
 source(here::here('code', '0setup.R'))
 
+# Set plot colors
+plotColors <- RColorBrewer::brewer.pal(3, "Set1")
+
 # Load models
 mxl_wtp <- readRDS(here::here("models", "mxl_wtp.Rds"))
 mxl_wtp_weighted <- readRDS(here::here("models", "mxl_wtp_weighted.Rds"))
@@ -153,8 +156,8 @@ xmax <- ceiling(max(c(df_mode_short$upper, df_mode_long$upper)))
 
 plot_mode_shortTrip <- df_mode_short %>% 
   ggplot(aes(y = par, x = mean, xmin = lower, xmax = upper)) +
-  geom_point(size = 1.5, color = "navyblue") +
-  geom_errorbar(width = 0.3, color = 'navyblue') +
+  geom_point(size = 1.5, color = plotColors[2]) +
+  geom_errorbar(width = 0.3, color = plotColors[2]) +
   facet_grid(mode~., scales = "free_y", space = "free") +
   scale_x_continuous(limits = c(xmin, xmax)) +
   labs(
@@ -172,8 +175,8 @@ plot_mode_shortTrip
 
 plot_mode_longTrip <- df_mode_long %>% 
   ggplot(aes(y = par, x = mean, xmin = lower, xmax = upper)) +
-  geom_point(size = 1.5, color = "navyblue") +
-  geom_errorbar(width = 0.3, color = 'navyblue') +
+  geom_point(size = 1.5, color = plotColors[2]) +
+  geom_errorbar(width = 0.3, color = plotColors[2]) +
   facet_grid(mode~., scales = "free_y", space = "free") +
   scale_x_continuous(limits = c(xmin, xmax)) +
   labs(
@@ -303,8 +306,8 @@ plot_mode_gender_shortTrip <- wtp_mode_short %>%
   ) +
     geom_vline(xintercept = 0, linetype = "dashed") +
   plot_theme() +
-  scale_color_viridis(discrete=TRUE)
-  
+  scale_color_manual(values = plotColors)
+
 plot_mode_gender_shortTrip
 
 plot_mode_gender_longTrip <- wtp_mode_long %>% 
@@ -326,28 +329,32 @@ plot_mode_gender_longTrip <- wtp_mode_long %>%
   geom_vline(xintercept = 0, linetype = "dashed") +
   plot_theme() +
   #theme(legend.position="bottom") +
-  scale_color_viridis(discrete=TRUE)
+  scale_color_manual(values = plotColors)
 
 plot_mode_gender_longTrip
 
+# Combine figures
 
-plot_gender <- plot_grid(
-  plot_mode_gender_shortTrip,
-  plot_mode_gender_longTrip,
-  nrow = 2
+plot_combined <- combine_plots(
+  plotlist = list(plot_mode_gender_shortTrip, plot_mode_gender_longTrip),
+  plotgrid.args = list(nrow = 2),
+  annotation.args = list(
+    title = paste0(
+      '<span style = "color: ', plotColors[2], ';">Men</span> ',
+      'willing to pay more than ',
+      '<span style = "color: ', plotColors[1], ';">Women</span> ',
+      'for automation + attendant'
+    ),
+    theme = theme(plot.title = element_markdown(
+      hjust = 0.5,
+      family = "Roboto Condensed",
+      face = "bold", 
+      size = 14
+    ))
+  )
 )
 
-title <- ggdraw() + 
-  draw_label("Men willing to pay more than women for automation + attendant", 
-             hjust = 0.5,
-             fontfamily = "Roboto Condensed",
-             fontface = "bold", 
-             size = 14)
-
-plot_combined <- plot_grid(title, plot_gender, ncol=1, rel_heights=c(0.08, 1)) 
-plot_combined
-
-#colorblindr::cvd_grid(plot_mode_gender_longTrip)
+# colorblindr::cvd_grid(plot_mode_gender_longTrip)
 
 ggsave(
   filename = here::here('figs', 'wtp_mode_gender.png'),
@@ -440,7 +447,7 @@ plot_mode_income_shortTrip <- wtp_mode_short %>%
   ) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   plot_theme() +
-  scale_color_viridis(discrete=TRUE)
+  scale_color_manual(values = plotColors)
 
 plot_mode_income_shortTrip
 
@@ -462,27 +469,31 @@ plot_mode_income_longTrip <- wtp_mode_long %>%
   ) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   plot_theme() +
-  theme(legend.position="bottom") +
-  scale_color_viridis(discrete=TRUE)
+  # theme(legend.position="bottom") +
+  scale_color_manual(values = plotColors)
 
 plot_mode_income_longTrip
 
+# Combine figures
 
-plot_income <- plot_grid(
-  plot_mode_income_shortTrip,
-  plot_mode_income_longTrip,
-  nrow = 2
+plot_combined <- combine_plots(
+  plotlist = list(plot_mode_income_shortTrip, plot_mode_income_longTrip),
+  plotgrid.args = list(nrow = 2),
+  annotation.args = list(
+    title = paste0(
+      '<span style = "color: ', plotColors[2], ';">Higher income</span> ',
+      'households willing to pay more than<br>',
+      '<span style = "color: ', plotColors[1], ';">Lower income</span> ',
+      'households for automation + attendant'
+    ),
+    theme = theme(plot.title = element_markdown(
+      hjust = 0.5,
+      family = "Roboto Condensed",
+      face = "bold", 
+      size = 14
+    ))
+  )
 )
-
-title <- ggdraw() + 
-  draw_label("Income differences", 
-             hjust = 0.5,
-             fontfamily = "Roboto Condensed",
-             fontface = "bold", 
-             size = 14)
-
-plot_combined <- plot_grid(title, plot_income, ncol=1, rel_heights=c(0.1, 1)) 
-plot_combined
 
 ggsave(
   filename = here::here('figs', 'wtp_mode_income.png'),
